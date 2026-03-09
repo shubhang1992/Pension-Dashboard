@@ -1,0 +1,41 @@
+{
+  "name": "pension-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "import:scheme-aum": "node ./scripts/import-scheme-aum-from-csv.mjs",
+    "import:m1-excel": "node ./scripts/import-m1-excel.mjs",
+    "import:state-wise": "node ./scripts/import-state-wise-pfrda.mjs",
+    "sync:pfrda": "node ./scripts/sync-pfrda-m1.mjs",
+    "sync:all": "node ./scripts/sync-all-pfrda.mjs"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "@svg-maps/india": "^2.0.0",
+    "dotenv": "^17.3.1",
+    "next": "^16.1.6",
+    "prisma": "6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "recharts": "^3.8.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^10.0.3",
+    "eslint-config-next": "^16.1.6",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.19",
+    "typescript": "5.9.3"
+  }
+}
