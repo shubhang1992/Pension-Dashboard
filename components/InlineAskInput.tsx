@@ -30,7 +30,6 @@ export function InlineAskInput() {
   function handleQuickPrompt(p: string) {
     if (loading) return
     setQuestion(p)
-    // Small delay so state updates before submit
     setTimeout(() => {
       const event = new Event('submit', { bubbles: true, cancelable: true })
       const form = document.getElementById('dashboard-ask-form')
@@ -61,7 +60,6 @@ export function InlineAskInput() {
       const answer = json.answer ?? 'No answer returned.'
       setMessages((prev) => [...prev, { role: 'assistant', content: answer }])
       setWebUsedLastAnswer(!!json.webUsed)
-      // Clear the input after a successful send so the user can type a new message.
       setQuestion('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Request failed')
@@ -72,15 +70,15 @@ export function InlineAskInput() {
   }
 
   return (
-    <div className="flex-shrink-0 border-t border-slate-700/50 pt-3">
-      <div className="mb-2 max-h-64 space-y-2 overflow-y-auto pr-1">
+    <div className="flex-shrink-0 border-t border-slate-700/50 pt-2 sm:pt-3">
+      <div className="mb-2 max-h-48 space-y-2 overflow-y-auto pr-1 sm:max-h-64">
         {messages.map((m, idx) => (
           <div
             key={idx}
             className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs leading-relaxed ${
+              className={`max-w-[85%] rounded-2xl px-3 py-2 text-xs leading-relaxed sm:max-w-[80%] ${
                 m.role === 'user'
                   ? 'bg-cyan-500/20 text-cyan-100'
                   : 'bg-slate-800/80 text-slate-100'
@@ -96,9 +94,9 @@ export function InlineAskInput() {
       <form
         id="dashboard-ask-form"
         onSubmit={handleSubmit}
-        className="space-y-2"
+        className="space-y-1.5 sm:space-y-2"
       >
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           <label htmlFor="dashboard-ask-input" className="sr-only">
             Ask about the data
           </label>
@@ -109,25 +107,27 @@ export function InlineAskInput() {
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Ask about the data…"
-            className="min-w-0 flex-1 rounded-lg border border-slate-600 bg-slate-800/80 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+            className="min-w-0 flex-1 rounded-lg border border-slate-600 bg-slate-800/80 px-2.5 py-1.5 text-sm text-white placeholder-slate-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 sm:px-3 sm:py-2"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading || !question.trim()}
-            className="flex-shrink-0 rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-600 disabled:opacity-50"
+            className="flex-shrink-0 rounded-lg bg-slate-700 px-2.5 py-1.5 text-sm font-medium text-slate-200 transition hover:bg-slate-600 disabled:opacity-50 sm:px-3 sm:py-2"
           >
             {loading ? '…' : 'Ask'}
           </button>
         </div>
       </form>
-      <div className="mt-1 flex flex-wrap gap-1.5">
-        {quickPrompts.map((p) => (
+      <div className="mt-1 flex flex-wrap gap-1 sm:gap-1.5">
+        {quickPrompts.map((p, i) => (
           <button
             key={p}
             type="button"
             onClick={() => handleQuickPrompt(p)}
-            className="rounded-full border border-slate-600/60 bg-slate-800/70 px-2 py-0.5 text-[10px] text-slate-200 transition hover:border-cyan-500/60 hover:bg-slate-800"
+            className={`rounded-full border border-slate-600/60 bg-slate-800/70 px-2 py-0.5 text-[10px] text-slate-200 transition hover:border-cyan-500/60 hover:bg-slate-800 ${
+              i >= 2 ? 'hidden sm:inline-block' : ''
+            }`}
             disabled={loading}
           >
             {p}
@@ -135,7 +135,7 @@ export function InlineAskInput() {
         ))}
       </div>
       {error && (
-        <p className="text-xs text-red-400">{error}</p>
+        <p className="mt-1 text-xs text-red-400">{error}</p>
       )}
       {!error && webUsedLastAnswer && messages.length > 0 && (
         <p className="mt-1 text-[10px] text-slate-500">

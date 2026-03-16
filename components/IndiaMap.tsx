@@ -36,7 +36,7 @@ export function IndiaMap({
     <div className={`flex items-center justify-center ${className}`}>
       <svg
         viewBox={mapData.viewBox}
-        className="h-full w-full max-h-[70vh] w-auto"
+        className="h-full w-full max-h-[55vh] sm:max-h-[65vh] lg:max-h-[70vh]"
         aria-label={mapData.label}
         style={{ overflow: 'visible' }}
       >

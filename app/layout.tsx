@@ -1,9 +1,16 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Pension Dashboard - India',
   description: 'Internal dashboard to track Indian pension market data.',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({
@@ -19,7 +26,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
+      <body className="min-h-[100dvh] bg-slate-950 text-slate-100 antialiased">
         {children}
       </body>
     </html>

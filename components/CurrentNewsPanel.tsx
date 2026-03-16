@@ -75,7 +75,7 @@ export function CurrentNewsPanel() {
   return (
     <div className="flex h-full flex-col">
       {error && (
-        <div className="mb-3 rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-2 text-xs text-amber-200">
+        <div className="mb-2 rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-2 text-xs text-amber-200 sm:mb-3">
           {error}
         </div>
       )}
@@ -84,14 +84,14 @@ export function CurrentNewsPanel() {
           No recent news articles found for the Indian pension market.
         </div>
       ) : (
-        <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+        <div className="flex-1 space-y-2 overflow-y-auto pr-1 sm:space-y-3">
           {articles.map((a, idx) => (
             <article
               key={idx}
-              className="group rounded-2xl border border-slate-800/60 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/40 px-3 py-2.5 shadow-sm transition hover:border-cyan-600/60 hover:from-slate-900 hover:via-slate-900/80 hover:to-slate-900/60"
+              className="group rounded-xl border border-slate-800/60 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/40 px-2.5 py-2 shadow-sm transition hover:border-cyan-600/60 hover:from-slate-900 hover:via-slate-900/80 hover:to-slate-900/60 sm:rounded-2xl sm:px-3 sm:py-2.5"
             >
-              <div className="flex gap-3">
-                <div className="hidden h-16 w-16 flex-none overflow-hidden rounded-full bg-slate-800/80 sm:flex items-center justify-center">
+              <div className="flex gap-2.5 sm:gap-3">
+                <div className="flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-full bg-slate-800/80 sm:h-14 sm:w-14">
                   {getDomain(a.url) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -99,7 +99,7 @@ export function CurrentNewsPanel() {
                         getDomain(a.url) as string
                       )}`}
                       alt=""
-                      className="h-9 w-9 rounded-full bg-slate-900 object-contain"
+                      className="h-6 w-6 rounded-full bg-slate-900 object-contain sm:h-8 sm:w-8"
                       loading="lazy"
                     />
                   ) : (
@@ -113,11 +113,11 @@ export function CurrentNewsPanel() {
                     href={a.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="line-clamp-2 text-sm font-semibold text-slate-100 hover:text-cyan-200 hover:underline"
+                    className="line-clamp-2 text-xs font-semibold text-slate-100 hover:text-cyan-200 hover:underline sm:text-sm"
                   >
                     {a.title}
                   </a>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[10px] font-medium text-slate-500">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-500 sm:gap-2">
                     {a.publishedAt && (
                       <span>
                         {new Date(a.publishedAt).toLocaleDateString('en-IN', {
@@ -128,13 +128,13 @@ export function CurrentNewsPanel() {
                       </span>
                     )}
                     {getDomain(a.url) && (
-                      <span className="rounded-full bg-slate-800/80 px-2 py-0.5 text-[10px] text-slate-300">
+                      <span className="rounded-full bg-slate-800/80 px-1.5 py-0.5 text-[10px] text-slate-300 sm:px-2">
                         {getDomain(a.url)}
                       </span>
                     )}
                   </div>
                   {a.summary && (
-                    <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-slate-300/90">
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-slate-300/90 sm:line-clamp-3 sm:text-xs">
                       {a.summary}
                     </p>
                   )}
@@ -147,4 +147,3 @@ export function CurrentNewsPanel() {
     </div>
   )
 }
-

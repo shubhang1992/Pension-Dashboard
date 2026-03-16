@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Sidebar } from '@/components/Sidebar'
 import { TopNavbar } from '@/components/TopNavbar'
 
@@ -18,7 +18,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     setSidebarOpen((prev) => {
       const next = !prev
       try {
@@ -28,17 +28,38 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       }
       return next
     })
-  }
+  }, [])
+
+  const closeSidebar = useCallback(() => {
+    setSidebarOpen(false)
+    try {
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, 'false')
+    } catch {
+      // ignore
+    }
+  }, [])
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-[100dvh] overflow-hidden">
+      {/* Mobile overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 lg:hidden"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar: overlay on mobile, push on desktop */}
       <aside
-        className={`flex-none overflow-hidden border-r border-slate-700/50 bg-slate-900/80 backdrop-blur transition-[width] duration-200 ease-out ${
-          sidebarOpen ? 'w-64' : 'w-0'
-        }`}
+        className={`
+          fixed inset-y-0 left-0 z-40 w-64 transform bg-slate-900 transition-transform duration-200 ease-out
+          lg:static lg:z-auto lg:transform-none lg:transition-[width]
+          ${sidebarOpen ? 'translate-x-0 lg:w-64' : '-translate-x-full lg:w-0'}
+        `}
         aria-hidden={!sidebarOpen}
       >
-        <div className="w-64">
+        <div className="h-full w-64 overflow-hidden">
           <Sidebar />
         </div>
       </aside>
@@ -48,7 +69,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           onMenuClick={toggleSidebar}
           sidebarOpen={sidebarOpen}
         />
-        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+        <main className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 md:px-6">
           {children}
         </main>
       </div>
