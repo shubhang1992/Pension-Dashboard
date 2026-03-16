@@ -11,17 +11,18 @@ export default async function AnalyticsPage() {
   })
 
   const latestAumDate = latestAum?.asOfDate ?? null
-  const aumRows = latestAumDate
-    ? await prisma.schemeAumHistory.findMany({
-        where: { asOfDate: latestAumDate },
-        select: { fundManagerName: true, schemeName: true, aumCrore: true },
-      })
-    : []
+  const aumRows =
+    latestAumDate != null
+      ? await prisma.schemeAumHistory.findMany({
+          where: { asOfDate: latestAumDate },
+          select: { fundManagerName: true, schemeName: true, aumCrore: true },
+        })
+      : []
 
-  const totalAum = aumRows.reduce<number>(
-    (sum, r) => sum + (r.aumCrore ?? 0),
-    0,
-  )
+  let totalAum = 0
+  for (const row of aumRows) {
+    totalAum += row.aumCrore ?? 0
+  }
 
   const byManager = new Map<string, number>()
   for (const r of aumRows) {
