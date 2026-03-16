@@ -27,11 +27,12 @@ export async function getFundManagerCount(): Promise<{ count: number; asOfDate: 
     select: { asOfDate: true },
   })
   if (!latest) return { count: 0, asOfDate: null }
-  const rows = await prisma.schemeAumHistory.findMany({
+  const rows: { fundManagerName: string }[] = await prisma.schemeAumHistory.findMany({
     where: { asOfDate: latest.asOfDate },
     select: { fundManagerName: true },
   })
-  const names = new Set(rows.map((r) => r.fundManagerName))
+  const names = new Set<string>()
+  for (const r of rows) names.add(r.fundManagerName)
   return {
     count: names.size,
     asOfDate: latest.asOfDate.toISOString().slice(0, 10),
