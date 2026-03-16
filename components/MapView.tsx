@@ -21,10 +21,14 @@ const MODE_META: Record<MapMode, { label: string; description: string }> = {
 type MapViewProps = {
   rightTopSlot?: React.ReactNode
   rightBottomSlot?: React.ReactNode
+  selectedState?: string | null
+  onSelectState?: (name: string | null) => void
 }
 
-export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
-  const [selectedState, setSelectedState] = useState<string | null>(null)
+export function MapView({ rightTopSlot, rightBottomSlot, selectedState: controlledState, onSelectState: controlledSetState }: MapViewProps) {
+  const [internalState, setInternalState] = useState<string | null>(null)
+  const selectedState = controlledState !== undefined ? controlledState : internalState
+  const setSelectedState = controlledSetState ?? setInternalState
   const [stateAumMap, setStateAumMap] = useState<Record<string, number>>({})
   const [stateSubscribersMap, setStateSubscribersMap] = useState<Record<string, number>>({})
   const [stateCoverageMap, setStateCoverageMap] = useState<Record<string, number>>({})
@@ -47,7 +51,7 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
   useEffect(() => {
     const p = searchParams.get('state')
     if (p && !selectedState) setSelectedState(p)
-  }, [searchParams, selectedState])
+  }, [searchParams, selectedState, setSelectedState])
 
   useEffect(() => {
     if (selectedState) {
@@ -60,9 +64,9 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
   }, [selectedState])
 
   const handleSelect = useCallback((name: string) => {
-    setSelectedState((prev) => (prev === name ? null : name))
-  }, [])
-  const handleClose = useCallback(() => setSelectedState(null), [])
+    setSelectedState(selectedState === name ? null : name)
+  }, [selectedState, setSelectedState])
+  const handleClose = useCallback(() => setSelectedState(null), [setSelectedState])
 
   const showState = !!selectedState
 
