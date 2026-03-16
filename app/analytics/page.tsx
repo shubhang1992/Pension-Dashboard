@@ -18,7 +18,10 @@ export default async function AnalyticsPage() {
       })
     : []
 
-  const totalAum = aumRows.reduce((s, r) => s + (r.aumCrore ?? 0), 0)
+  const totalAum = aumRows.reduce<number>(
+    (sum, r) => sum + (r.aumCrore ?? 0),
+    0,
+  )
 
   const byManager = new Map<string, number>()
   for (const r of aumRows) {
