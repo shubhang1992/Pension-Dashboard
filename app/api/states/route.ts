@@ -43,21 +43,24 @@ export async function GET() {
   const latestDate = latest?.asOfDate ?? null
 
   if (latestDate) {
-    const rows = await prisma.schemeAumHistory.findMany({
+    type AumRow = { fundManagerName: string; aumCrore: number | null }
+    const rows: AumRow[] = await prisma.schemeAumHistory.findMany({
       where: { asOfDate: latestDate },
       select: { fundManagerName: true, aumCrore: true },
     })
     for (const m of managers) {
       const dbState = m.state ? normalizeStateNameForDb(m.state) : null
       if (!dbState) continue
-      const matchRows = rows.filter(
-        (r) =>
+      let aum = 0
+      for (const r of rows) {
+        if (
           r.fundManagerName === m.name ||
           r.fundManagerName.includes(m.name) ||
           m.name.includes(r.fundManagerName)
-      )
-      let aum = 0
-      for (const r of matchRows) aum += r.aumCrore ?? 0
+        ) {
+          aum += r.aumCrore ?? 0
+        }
+      }
       const svgStateName = findSvgStateNameForDb(dbState, mapData.locations)
       if (svgStateName) stateAum[svgStateName] = (stateAum[svgStateName] ?? 0) + aum
     }
