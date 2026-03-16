@@ -53,13 +53,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar: overlay on mobile, push on desktop */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-40 w-64 transform bg-slate-900 transition-transform duration-200 ease-out
+          fixed inset-y-0 left-0 z-40 w-64 transform overflow-hidden bg-slate-900 transition-transform duration-200 ease-out
           lg:static lg:z-auto lg:transform-none lg:transition-[width]
           ${sidebarOpen ? 'translate-x-0 lg:w-64' : '-translate-x-full lg:w-0'}
         `}
         aria-hidden={!sidebarOpen}
       >
-        <div className="h-full w-64 overflow-hidden">
+        <div className="h-full w-64">
           <Sidebar />
         </div>
       </aside>
