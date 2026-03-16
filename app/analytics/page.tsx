@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { normalizeStateNameForDb } from '@/lib/state-name-map'
 import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AnalyticsPage() {
   // All-India AUM (latest M1)
   const latestAum = await prisma.schemeAumHistory.findFirst({
@@ -131,4 +133,3 @@ export default async function AnalyticsPage() {
     </DashboardLayout>
   )
 }
-

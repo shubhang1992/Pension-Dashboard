@@ -22,7 +22,7 @@ export function TopNavbar({ onMenuClick, sidebarOpen = true }: TopNavbarProps) {
     let timeout: ReturnType<typeof setTimeout> | null = null
     try {
       const controller = new AbortController()
-      timeout = setTimeout(() => controller.abort(), 120000)
+      timeout = setTimeout(() => controller.abort(), 120_000)
       const res = await fetch('/api/sync-pfrda', {
         method: 'POST',
         signal: controller.signal,
@@ -36,14 +36,14 @@ export function TopNavbar({ onMenuClick, sidebarOpen = true }: TopNavbarProps) {
         })
         return
       }
-      const m1 = data.m1Rows ?? data.rowsImported ?? 0
+      const m1 = data.m1Rows ?? 0
       const state = data.stateUpserted ?? 0
-      const asOf = typeof data.m1LatestAsOf === 'string' ? data.m1LatestAsOf : null
+      const asOf = data.m1LatestAsOf ? ` (M1 as of ${data.m1LatestAsOf})` : ''
       setMessage({
         type: 'success',
         text: state
-          ? `Synced: ${m1} AUM rows${asOf ? ` (latest ${asOf})` : ''}, ${state} state snapshots.`
-          : `Synced ${m1} rows from PFRDA${asOf ? ` (latest ${asOf})` : ''}.`,
+          ? `Synced: ${m1} AUM rows, ${state} state snapshots${asOf}.`
+          : `Synced ${m1} rows from PFRDA${asOf}.`,
       })
       router.refresh()
     } catch (err) {
@@ -51,7 +51,7 @@ export function TopNavbar({ onMenuClick, sidebarOpen = true }: TopNavbarProps) {
         type: 'error',
         text:
           err instanceof Error && err.name === 'AbortError'
-            ? 'Sync is taking too long. Please refresh the page in 1-2 minutes to see updated data.'
+            ? 'Sync is taking too long. Refresh the page in 1-2 minutes to see updated data.'
             : err instanceof Error
               ? err.message
               : 'Refresh failed',
@@ -106,7 +106,7 @@ export function TopNavbar({ onMenuClick, sidebarOpen = true }: TopNavbarProps) {
         </button>
         {message && (
           <span
-            className={`max-w-[200px] text-xs ${
+            className={`max-w-[260px] text-xs ${
               message.type === 'success' ? 'text-emerald-400' : 'text-red-400'
             }`}
           >

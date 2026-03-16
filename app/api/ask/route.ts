@@ -201,9 +201,9 @@ async function maybeSearchWeb(question: string, parsed: ParsedIntent): Promise<s
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        api_key: apiKey,
         query: question,
         max_results: 5,
         search_depth: 'basic',

@@ -8,28 +8,28 @@ datasource db {
 }
 
 model PensionFundManager {
-  id        Int              @id @default(autoincrement())
+  id        Int             @id @default(autoincrement())
   name      String
   aum       Float
   city      String?
   state     String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
   schemes   PensionScheme[]
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
 }
 
 model PensionScheme {
-  id          Int                @id @default(autoincrement())
-  name        String
-  category    String?
-  riskLevel   String?
-  aum         Float?
-  manager     PensionFundManager @relation(fields: [managerId], references: [id])
-  managerId   Int
-  launchedAt  DateTime?
-  isActive    Boolean            @default(true)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id         Int                @id @default(autoincrement())
+  name       String
+  category   String?
+  riskLevel  String?
+  aum        Float?
+  managerId  Int
+  launchedAt DateTime?
+  isActive   Boolean            @default(true)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  manager    PensionFundManager @relation(fields: [managerId], references: [id])
 }
 
 model SchemeAumHistory {
@@ -39,7 +39,6 @@ model SchemeAumHistory {
   schemeName      String
   aumCrore        Float?
   subscribers     Int?
-
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -49,24 +48,43 @@ model SchemeAumHistory {
 /// State/UT-wise snapshot (e.g. from PFRDA state-wise reports or OGD).
 /// When present, state panel shows this; otherwise falls back to All-India totals.
 model StateWiseSnapshot {
-  id                 Int      @id @default(autoincrement())
-  stateName          String
-  asOfDate           DateTime
-  subscribers        Int?
-  aumCrore           Float?
+  id                  Int      @id @default(autoincrement())
+  stateName           String
+  asOfDate            DateTime
+  subscribers         Int?
+  aumCrore            Float?
   /// From M7: cumulative SG-sector contribution (sum of all months, ₹ Cr)
-  contributionCrore  Float?
-  /// From A6: Female / Male / Transgender (APY state-wise)
-  genderFemale       Int?
-  genderMale         Int?
-  genderTransgender  Int?
+  contributionCrore   Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
   /// From A22: age-band wise (NPS All Citizen). JSON e.g. {"18-20": 100, "21-25": 200, ...}
-  ageBreakdown       Json?
+  ageBreakdown        Json?
+  /// From A6: Female / Male / Transgender (APY state-wise)
+  genderFemale        Int?
+  genderMale          Int?
+  genderTransgender   Int?
   /// Optional monthly SG contribution history from M7, e.g. {"Dec-2014": 10.5, ...}
   contributionHistory Json?
 
-  createdAt          DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
   @@unique([stateName, asOfDate])
+}
+
+model SchemeHolding {
+  id               Int      @id @default(autoincrement())
+  asOfDate         DateTime
+  fundManagerName  String
+  schemeName       String
+  isin             String?
+  securityName     String
+  sector           String?
+  assetClass       String?
+  weightPct        Float?
+  marketValueCrore Float?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+
+  @@unique([asOfDate, fundManagerName, schemeName, securityName])
+  @@index([fundManagerName, asOfDate])
+  @@index([schemeName, asOfDate])
+  @@index([securityName])
 }

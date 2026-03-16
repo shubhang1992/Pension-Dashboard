@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { normalizeStateNameForDb } from '@/lib/state-name-map'
 import { StateContributionsTabs } from '@/components/StateContributionsTabs'
 
+export const dynamic = 'force-dynamic'
+
 type Props = {
   params: Promise<{ name: string }>
 }
@@ -68,4 +70,3 @@ export default async function StateContributionsPage({ params }: Props) {
     </DashboardLayout>
   )
 }
-
