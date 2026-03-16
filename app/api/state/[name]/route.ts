@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { normalizeStateNameForDb } from '@/lib/state-name-map'
 
+function buildManagerList(managers: { id: number; name: string }[]): { name: string; aumCrore: number }[] {
+  const result: { name: string; aumCrore: number }[] = []
+  for (const m of managers) {
+    result.push({ name: m.name, aumCrore: 0 })
+  }
+  return result
+}
+
 async function getLeaderboard(): Promise<{ name: string; aumCrore: number }[]> {
   const latest = await prisma.schemeAumHistory.findFirst({
     orderBy: { asOfDate: 'desc' },
@@ -99,7 +107,7 @@ export async function GET(
       subscribers: 0,
       contributionCrore: null,
       asOfDate: null,
-      managers: managers.map((m) => ({ name: m.name, aumCrore: 0 })),
+      managers: buildManagerList(managers),
       isAllIndiaFallback: false,
       genderFemale: null,
       genderMale: null,
