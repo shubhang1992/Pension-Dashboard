@@ -134,15 +134,18 @@ export function IndiaMap({
     [getDataMap, activeScale, mapMode]
   )
 
-  const tooltipText = useCallback(
-    (name: string) => {
-      const v = getDataMap(name)
-      if (v <= 0) return 'No data'
-      if (mapMode === 'aum') return `Rs ${Math.round(v).toLocaleString('en-IN')} Cr`
-      if (mapMode === 'subscribers') return v.toLocaleString('en-IN')
-      return `${v.toFixed(2)}%`
+  const tooltipLines = useCallback(
+    (name: string): { label: string; value: string; active: boolean }[] => {
+      const aum = stateAumMap[name] ?? 0
+      const subs = stateSubscribersMap[name] ?? 0
+      const cov = stateCoverageMap[name] ?? 0
+      const lines: { label: string; value: string; active: boolean }[] = []
+      if (aum > 0) lines.push({ label: 'AUM', value: `₹${Math.round(aum).toLocaleString('en-IN')} Cr`, active: mapMode === 'aum' })
+      if (subs > 0) lines.push({ label: 'Subscribers', value: subs.toLocaleString('en-IN'), active: mapMode === 'subscribers' })
+      if (cov > 0) lines.push({ label: 'Coverage', value: `${cov.toFixed(2)}%`, active: mapMode === 'coverage' })
+      return lines
     },
-    [getDataMap, mapMode]
+    [stateAumMap, stateSubscribersMap, stateCoverageMap, mapMode]
   )
 
   const legendStops = useMemo(
@@ -216,12 +219,26 @@ export function IndiaMap({
       </svg>
 
       {/* Tooltip */}
-      {hovered && !selectedStateName && (
-        <div className="pointer-events-none absolute bottom-12 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-slate-600/60 bg-slate-800/95 px-3 py-1.5 text-xs shadow-2xl backdrop-blur-sm sm:bottom-14">
-          <span className="font-semibold text-white">{hovered}</span>
-          <span className="ml-2 text-cyan-300">{tooltipText(hovered)}</span>
-        </div>
-      )}
+      {hovered && !selectedStateName && (() => {
+        const lines = tooltipLines(hovered)
+        return (
+          <div className="pointer-events-none absolute bottom-12 left-1/2 z-20 -translate-x-1/2 rounded-lg border border-slate-600/60 bg-slate-800/95 px-3 py-1.5 text-xs shadow-2xl backdrop-blur-sm sm:bottom-14">
+            <p className="font-semibold text-white">{hovered}</p>
+            {lines.length === 0 ? (
+              <p className="mt-0.5 text-slate-500">No data</p>
+            ) : (
+              <div className="mt-0.5 flex flex-col gap-0.5">
+                {lines.map((l) => (
+                  <div key={l.label} className="flex items-center justify-between gap-3">
+                    <span className="text-slate-400">{l.label}</span>
+                    <span className={l.active ? 'font-medium text-cyan-300' : 'text-slate-300'}>{l.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Gradient legend bar */}
       <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-500 sm:mt-2 sm:text-[11px]">
