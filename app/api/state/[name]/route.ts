@@ -32,7 +32,9 @@ async function getAllIndiaAum(): Promise<number> {
     where: { asOfDate: latest.asOfDate },
     select: { aumCrore: true },
   })
-  return rows.reduce((s, r) => s + (r.aumCrore ?? 0), 0)
+  let total = 0
+  for (const r of rows) total += r.aumCrore ?? 0
+  return total
 }
 
 export async function GET(
@@ -124,8 +126,12 @@ export async function GET(
         r.fundManagerName.includes(m.name) ||
         m.name.includes(r.fundManagerName)
     )
-    const aum = matchRows.reduce((s, r) => s + (r.aumCrore ?? 0), 0)
-    const subs = matchRows.reduce((s, r) => s + (r.subscribers ?? 0), 0)
+    let aum = 0
+    let subs = 0
+    for (const r of matchRows) {
+      aum += r.aumCrore ?? 0
+      subs += r.subscribers ?? 0
+    }
     totalAum += aum
     totalSubscribers += subs
     managerAumList.push({ name: m.name, aumCrore: aum })
@@ -136,7 +142,8 @@ export async function GET(
   const hasStateData = totalAum > 0 || totalSubscribers > 0 || managers.length > 0
 
   const leaderboard = await getLeaderboard()
-  const allIndiaAum = rows.reduce((s, r) => s + (r.aumCrore ?? 0), 0)
+  let allIndiaAum = 0
+  for (const r of rows) allIndiaAum += r.aumCrore ?? 0
 
   if (hasStateData) {
     return NextResponse.json({
@@ -159,7 +166,8 @@ export async function GET(
   }
 
   // 3) No state-wise data and no managers in this state → show All-India totals for reference
-  const allIndiaSubscribers = rows.reduce((s, r) => s + (r.subscribers ?? 0), 0)
+  let allIndiaSubscribers = 0
+  for (const r of rows) allIndiaSubscribers += r.subscribers ?? 0
 
   return NextResponse.json({
     stateName: stateNameDecoded,

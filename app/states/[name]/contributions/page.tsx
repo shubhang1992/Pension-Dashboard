@@ -42,7 +42,8 @@ export default async function StateContributionsPage({ params }: Props) {
     })
     ordered = parsed.map((p) => [p.label, p.value])
     if (!total || total <= 0) {
-      total = ordered.reduce((s, [, v]) => s + v, 0)
+      total = 0
+      for (const [, v] of ordered) total += v
     }
   }
 

@@ -19,10 +19,8 @@ export default async function HomePage() {
         )
       : []
 
-  const totalAum = rowsLatest.reduce(
-    (sum, r) => sum + (r.aumCrore ?? 0),
-    0
-  )
+  let totalAum = 0
+  for (const r of rowsLatest) totalAum += r.aumCrore ?? 0
   const fundManagerNames = new Set(rowsLatest.map((r) => r.fundManagerName))
   const totalManagers = fundManagerNames.size
   const hasPfrdaData = aumHistory.length > 0

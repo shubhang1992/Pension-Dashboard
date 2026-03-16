@@ -27,8 +27,10 @@ export function StateContributionsTabs({ stateName, total, ordered }: Props) {
 
   const last12 = ordered.slice(-12)
   const prev12 = ordered.slice(-24, -12)
-  const last12Total = last12.reduce((s, [, v]) => s + v, 0)
-  const prev12Total = prev12.reduce((s, [, v]) => s + v, 0)
+  let last12Total = 0
+  for (const [, v] of last12) last12Total += v
+  let prev12Total = 0
+  for (const [, v] of prev12) prev12Total += v
   const last12Avg = last12.length ? last12Total / last12.length : 0
   const prev12Avg = prev12.length ? prev12Total / prev12.length : 0
   let yoyChangePct: number | null = null

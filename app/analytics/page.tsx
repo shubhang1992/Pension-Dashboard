@@ -72,8 +72,12 @@ export default async function AnalyticsPage() {
     }
   }
 
-  const totalSubscribers = stateAgg.reduce((s, r) => s + r.subscribers, 0)
-  const totalContributionCrore = stateAgg.reduce((s, r) => s + r.contributionCrore, 0)
+  let totalSubscribers = 0
+  let totalContributionCrore = 0
+  for (const r of stateAgg) {
+    totalSubscribers += r.subscribers
+    totalContributionCrore += r.contributionCrore
+  }
   const ageBreakdownAllIndia = Object.entries(ageAllIndia)
     .filter(([, count]) => count > 0)
     .sort((a, b) => {

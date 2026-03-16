@@ -13,7 +13,8 @@ export async function getTotalAum(): Promise<{ totalAumCrore: number; asOfDate: 
     where: { asOfDate: latest.asOfDate },
     select: { aumCrore: true },
   })
-  const totalAumCrore = rows.reduce((s, r) => s + (r.aumCrore ?? 0), 0)
+  let totalAumCrore = 0
+  for (const r of rows) totalAumCrore += r.aumCrore ?? 0
   return {
     totalAumCrore,
     asOfDate: latest.asOfDate.toISOString().slice(0, 10),
@@ -102,7 +103,8 @@ export async function getTopManagers(limit = 10): Promise<{
       (byManager.get(r.fundManagerName) ?? 0) + (r.aumCrore ?? 0)
     )
   }
-  const totalAumCrore = Array.from(byManager.values()).reduce((s, a) => s + a, 0)
+  let totalAumCrore = 0
+  for (const a of byManager.values()) totalAumCrore += a
   const leaderboard = Array.from(byManager.entries())
     .map(([name, aumCrore]) => ({
       name,
@@ -134,7 +136,8 @@ export async function getTopStatesBySubscribers(limit = 10): Promise<{
     seen.add(s.stateName)
     byState.push({ stateName: s.stateName, subscribers: s.subscribers ?? 0 })
   }
-  const totalSubscribers = byState.reduce((sum, s) => sum + s.subscribers, 0)
+  let totalSubscribers = 0
+  for (const s of byState) totalSubscribers += s.subscribers
   const states = byState
     .sort((a, b) => b.subscribers - a.subscribers)
     .slice(0, limit)
@@ -159,7 +162,8 @@ export async function getTopStatesByContribution(limit = 10): Promise<{
       byState.push({ stateName: s.stateName, contributionCrore })
     }
   }
-  const totalContributionCrore = byState.reduce((sum, s) => sum + s.contributionCrore, 0)
+  let totalContributionCrore = 0
+  for (const s of byState) totalContributionCrore += s.contributionCrore
   const states = byState
     .sort((a, b) => b.contributionCrore - a.contributionCrore)
     .slice(0, limit)

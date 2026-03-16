@@ -35,7 +35,8 @@ export async function GET() {
     if (aum > 0) entry.schemes.push({ schemeName: r.schemeName, aumCrore: aum })
   }
 
-  const totalAumCrore = Array.from(byManager.values()).reduce((s, m) => s + m.aumCrore, 0)
+  let totalAumCrore = 0
+  for (const m of byManager.values()) totalAumCrore += m.aumCrore
   const leaderboard = Array.from(byManager.entries())
     .map(([name, data]) => ({
       name,

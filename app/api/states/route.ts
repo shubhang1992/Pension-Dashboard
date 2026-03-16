@@ -56,7 +56,8 @@ export async function GET() {
           r.fundManagerName.includes(m.name) ||
           m.name.includes(r.fundManagerName)
       )
-      const aum = matchRows.reduce((s, r) => s + (r.aumCrore ?? 0), 0)
+      let aum = 0
+      for (const r of matchRows) aum += r.aumCrore ?? 0
       const svgStateName = findSvgStateNameForDb(dbState, mapData.locations)
       if (svgStateName) stateAum[svgStateName] = (stateAum[svgStateName] ?? 0) + aum
     }
