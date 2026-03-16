@@ -1,0 +1,339 @@
+{
+  "project": "India Pension Dashboard",
+  "stack": "Next.js 16 App Router, Tailwind CSS 3, Recharts 3, TypeScript",
+  "theme": "Dark only (slate-950 background). Do NOT add a light/dark mode toggle.",
+  "global_rules": [
+    "All elements must be properly aligned — use consistent gap, padding, and flex/grid alignment throughout.",
+    "No element should overlap another unless it is intentionally layered (e.g. modals, tooltips, dropdowns, FAB).",
+    "Maintain the existing dark theme color palette: backgrounds slate-950/slate-900/slate-800, borders slate-700/50, primary accent cyan-400/500, secondary emerald-400, warning amber-400, error red-400.",
+    "All new components must be mobile-first and fully responsive. Use sm:, md:, lg: breakpoints consistently. Test layouts at 375px, 768px, and 1280px widths.",
+    "Do not change or break any existing API routes, data-fetching logic, or Prisma models.",
+    "Do not add a light/dark mode toggle anywhere in the app.",
+    "All monetary values must be formatted consistently as: ₹ X,XX,XXX Cr (Indian locale, rounded to nearest integer, with 'Cr' suffix). Use .toLocaleString('en-IN') everywhere.",
+    "All interactive elements (buttons, links, expandable rows) must have visible hover and focus states for accessibility.",
+    "Preserve all existing keyboard shortcuts (Ctrl+K for search, Escape to close dropdowns).",
+    "When adding icons, use inline SVG only — do not install new icon libraries."
+  ],
+
+  "changes": [
+
+    {
+      "id": "NAV-01",
+      "title": "Add section groupings to Sidebar navigation",
+      "file": "components/Sidebar.tsx",
+      "priority": "high",
+      "description": "Split the 5 flat sidebar items into two labeled groups. Group 1 (no label, top): Overview. Group 2 (label 'Analysis', shown as uppercase tracking-wider text-slate-500 text-[10px] separator above the group): Analytics, Fund Managers, Compare. Group 3 (label 'Reference'): Reports. Add a small spacer (mb-4) between groups. Each group label must be left-aligned, non-clickable, and visually distinct from nav items. The sidebar footer showing 'Source: PFRDA M1, A22, A6, M7' should also show a 'last synced' timestamp. Pass the timestamp down as a prop from DashboardLayout (read from localStorage key 'pension-dashboard-last-synced'). Format it as 'Synced: DD MMM YYYY'. If no timestamp exists, show only the source line. Footer text must not overflow or overlap the nav items — ensure flex-1 on the nav section pushes footer to the bottom.",
+      "alignment_notes": "Group labels must align flush-left with nav item text (same px-3 horizontal padding). Footer must be pinned to the bottom of the sidebar with mt-auto and never overlap nav items regardless of sidebar height."
+    },
+
+    {
+      "id": "NAV-02",
+      "title": "Add icons to Sidebar navigation items",
+      "file": "components/Sidebar.tsx",
+      "priority": "medium",
+      "description": "Add a small inline SVG icon (h-4 w-4) to the left of each sidebar nav label. Use these icons: Overview = home outline, Analytics = bar chart outline, Fund Managers = users outline, Compare = arrows-right-left outline, Reports = document-text outline. Icon and label must be horizontally aligned using flex items-center gap-2. Active state: icon inherits text-cyan-400. Inactive state: icon inherits text-slate-400. On mobile when sidebar is collapsed (width 0), nothing should be visible — do not show icon-only mode.",
+      "alignment_notes": "Icons must be vertically centered with label text. Use flex items-center on the anchor element. Icon size h-4 w-4 is fixed — do not scale with font size."
+    },
+
+    {
+      "id": "NAV-03",
+      "title": "Add breadcrumbs to state drill-down page",
+      "file": "app/states/[name]/contributions/page.tsx",
+      "priority": "medium",
+      "description": "At the top of the contributions page, add a breadcrumb row above the page title. Format: 'Overview / [State Name]'. 'Overview' is a Next.js Link to '/'. Separator '/' is a static text-slate-500 character. '[State Name]' is plain text (not a link), text-white. The entire breadcrumb row should use flex items-center gap-2 text-sm. It must sit above the existing page title heading with mb-2 spacing between breadcrumb and title. The breadcrumb row must not overlap the TopNavbar — it lives inside the main content area, not fixed/sticky.",
+      "alignment_notes": "Breadcrumb must be left-aligned with the page title. Do not use absolute positioning. It flows naturally in the document as the first element inside the page's top-level div."
+    },
+
+    {
+      "id": "NAVBAR-01",
+      "title": "Add confirmation popover before PFRDA sync",
+      "file": "components/TopNavbar.tsx",
+      "priority": "high",
+      "description": "Wrap the 'Refresh from PFRDA' button behavior with a confirmation step. When clicked, show a small popover/tooltip directly below the button (not a full modal). The popover must contain: title 'Sync from PFRDA?' in font-semibold text-white text-sm, body text 'This fetches latest M1, A22, A6 & M7 data and may take up to 2 minutes.' in text-xs text-slate-400, and two buttons: 'Cancel' (bg-slate-700 hover:bg-slate-600) and 'Sync now' (bg-cyan-500 hover:bg-cyan-600 text-white). Clicking 'Sync now' proceeds with the existing handleRefreshFromPfrda logic. Clicking 'Cancel' or clicking outside closes the popover without syncing. The popover must be positioned absolute, right-aligned under the button using top-full right-0 mt-1.5, with z-50, rounded-xl, border border-slate-700, bg-slate-900 shadow-2xl p-4 min-w-[260px]. It must never overflow off-screen — add right-0 positioning to keep it within the viewport on mobile.",
+      "alignment_notes": "The popover must be right-aligned with the Refresh button edge. Use relative positioning on the button's parent wrapper div, and absolute on the popover. On mobile (< 640px) the popover width should be min-w-[220px] to avoid overflowing the left edge of the screen."
+    },
+
+    {
+      "id": "NAVBAR-02",
+      "title": "Add tooltip to Internal badge and hide subtitle on mobile",
+      "file": "components/TopNavbar.tsx",
+      "priority": "low",
+      "description": "1) Add a title attribute to the 'Internal' badge span: title='This dashboard is for internal PFRDA data access only'. 2) The subtitle paragraph ('State-wise data · Fund managers · Auto-sync from PFRDA') currently uses 'hidden sm:block' — keep that. On mobile (default hidden), this is correct. 3) After syncing succeeds, store the current timestamp to localStorage under key 'pension-dashboard-last-synced' (ISO string). This allows the Sidebar footer to read it for the last-synced display (see NAV-01).",
+      "alignment_notes": "No layout changes required. The badge and subtitle remain in their existing positions."
+    },
+
+    {
+      "id": "OVERVIEW-01",
+      "title": "Add a summary stats bar above the map on Overview tab",
+      "file": "components/DashboardTabs.tsx",
+      "priority": "high",
+      "description": "Above the MapView component (inside the overview tab content, not outside the card), add a horizontal summary bar showing 3 All-India metrics inline: 'AUM', 'Subscribers', and 'Coverage'. This bar must: use flex items-center justify-around or a 3-column grid (grid grid-cols-3 divide-x divide-slate-700/50), show each metric as a label (text-[10px] uppercase tracking-wider text-slate-500) above a value (text-sm font-bold text-cyan-400 font-mono), be horizontally scrollable on very small screens (overflow-x-auto), have py-2 px-3 border-b border-slate-700/50 styling, and sit between the tab bar and the MapView with no gap or overlap. The Coverage value is derived from totalSubscribers divided by total working-age population (use the existing STATE_WORKING_AGE_POPULATION map — sum all values as total working-age population). If hasPfrdaData is false, show '—' for all values.",
+      "alignment_notes": "The stats bar must be a block-level element inside the flex-col container, between the tab controls row and the map area. It must have flex-shrink-0 so it never collapses. The 3 metric columns must be equal width. Labels and values inside each column must be centered (text-center)."
+    },
+
+    {
+      "id": "OVERVIEW-02",
+      "title": "Remove duplicate state dropdown selector from Overview tab",
+      "file": "components/DashboardTabs.tsx",
+      "priority": "high",
+      "description": "Remove the StateSearchDropdown component that appears in the tab bar area next to the Overview/News tab pills. State selection already works by clicking states on the map directly. Remove the StateSearchDropdown import, usage, and the StateSearchDropdown function definition entirely from this file. Ensure that removing this component does not break any state — the selectedState and handleStateChange remain and are still passed to MapView.",
+      "alignment_notes": "After removal, the tab bar row must still use flex items-center justify-between. Check that the remaining elements (tab pills on the left, optional news text on the right) align correctly with gap-2 and no orphaned wrappers."
+    },
+
+    {
+      "id": "OVERVIEW-03",
+      "title": "Move AI chat input to floating action button (FAB)",
+      "file": "components/DashboardTabs.tsx and components/InlineAskInput.tsx",
+      "priority": "high",
+      "description": "Remove the InlineAskInput from the rightBottomSlot prop passed to MapView. Instead, render a floating action button (FAB) fixed to the bottom-right corner of the viewport at fixed bottom-6 right-6 z-50. The FAB is a rounded-full h-12 w-12 bg-cyan-500 hover:bg-cyan-600 shadow-lg flex items-center justify-center button with a chat-bubble SVG icon (h-5 w-5 text-white). When clicked, a drawer/panel slides up from the bottom of the screen (on mobile) or appears as a fixed panel on the bottom-right (on desktop, w-96 max-h-[60vh]). The InlineAskInput renders inside this panel. The panel has a header row with 'Ask about the data' title and a close button (×). The panel background is bg-slate-900 border border-slate-700/50 rounded-t-2xl (mobile) or rounded-2xl (desktop) shadow-2xl. Panel state (open/closed) is managed locally in DashboardTabs. The FAB must be rendered at the DashboardTabs level (not inside MapView) so it appears on all tabs. The panel must be accessible from both the Overview and News tabs.",
+      "alignment_notes": "FAB must not overlap the sidebar or the TopNavbar. It must not overlap page content — use fixed positioning only. On mobile the drawer must overlay the full width of the screen with bottom-0 left-0 right-0, not just the main content area. The close button inside the panel header must be right-aligned using flex justify-between."
+    },
+
+    {
+      "id": "OVERVIEW-04",
+      "title": "Add Reset button on map when a state is selected",
+      "file": "components/MapView.tsx",
+      "priority": "medium",
+      "description": "When selectedState is not null, show a 'Reset map' or '← All India' button overlaid on the top-left corner of the map area (not outside it). It must use absolute top-2 left-2 z-10 positioning relative to the map container (which should be position-relative). Button style: rounded-lg bg-slate-800/80 border border-slate-700/60 px-2.5 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-slate-700/80 backdrop-blur-sm flex items-center gap-1.5 with a left-arrow SVG (h-3 w-3). Clicking it calls onSelectState(null). When selectedState is null, this button must not render at all.",
+      "alignment_notes": "The button must use absolute positioning inside a relative-positioned map wrapper. It must not overlap the map mode toggle buttons (which should be in a different corner). Do not use fixed positioning — the button scrolls with the map container."
+    },
+
+    {
+      "id": "OVERVIEW-05",
+      "title": "Add actual min/max value labels to map legend",
+      "file": "components/IndiaMap.tsx or MapView.tsx (wherever the gradient legend bar is rendered)",
+      "priority": "medium",
+      "description": "The existing gradient legend bar shows a color strip without numeric labels. Add text labels on both ends: the minimum value (formatted appropriately for the current mode: toLocaleString for AUM/Subscribers, toFixed(1)+'%' for Coverage) on the left below or beside the bar, and the maximum value on the right. Also add the current map mode name as a label above or centered on the bar (e.g. 'AUM (₹ Cr)', 'Subscribers', 'Coverage (%)). Labels must use text-[10px] text-slate-400. The legend bar container must use flex flex-col gap-1 with the mode label centered (text-center) above the bar, and a flex justify-between row below the bar for min/max values.",
+      "alignment_notes": "Legend must be self-contained with no overflow. Min value must be left-aligned, max value right-aligned, using flex justify-between on the same row. The legend must not overlap state names or the map tooltip."
+    },
+
+    {
+      "id": "STATE-01",
+      "title": "Replace monthly SG contribution scrollable list with inline bar chart",
+      "file": "components/StateDetailPanel.tsx",
+      "priority": "high",
+      "description": "Replace the <ul> scrollable list of monthly SG contribution values (the max-h-32 overflow-y-auto list) with a compact horizontal bar chart using Recharts BarChart. Use the latestMonths array (up to 12 months) as data. The chart must be: h-28 sm:h-32, use ResponsiveContainer width 100%, show bars in cyan-500 fill with radius [2,2,0,0], use XAxis with the month labels (e.g. 'Jan-24') rotated -45deg, angle={-45} textAnchor='end' height={36} tick font size 8 fill #94a3b8, use YAxis tickFormatter to abbreviate large numbers (e.g. 500 -> '500', 1200 -> '1.2k') tick font size 8 fill #94a3b8, and show a Tooltip styled consistently with the rest of the app (bg #0f172a border #334155 rounded-lg fontSize 12) showing the month and value in ₹ Cr format. Remove the nested scroll container entirely. Keep the 'View full details →' link below the chart.",
+      "alignment_notes": "The chart container must have w-full and no fixed height constraints from parent. The chart must not overflow the StateDetailPanel horizontally. Ensure the XAxis labels do not overlap the chart bars — use sufficient height value on the XAxis."
+    },
+
+    {
+      "id": "STATE-02",
+      "title": "Merge the two fund manager lists in StateDetailPanel",
+      "file": "components/StateDetailPanel.tsx",
+      "priority": "medium",
+      "description": "Currently there are two separate sections: 'Fund manager leaderboard' (data.leaderboard, top 10 by All-India rank) and 'Fund managers in this state' (data.managers). Merge them into a single section titled 'Fund managers in this state'. The merged list must show data.managers (which has state-specific AUM). For each manager in data.managers, also show their All-India rank if the manager appears in data.leaderboard (match by name). Display the rank as a small badge (e.g. '#3 All-India') in text-[10px] text-slate-500 beside the manager name. Sort the merged list by state-specific AUM descending. Remove the separate 'Fund manager leaderboard' section entirely. If data.managers is empty but data.leaderboard has entries, fall back to showing data.leaderboard with a note 'All-India rankings (state data unavailable)'. Empty state message: 'No fund manager data. Click Refresh from PFRDA to load M1 data.'",
+      "alignment_notes": "Each list item must use flex items-center justify-between. The manager name + rank badge must be in a flex items-center gap-1.5 group on the left. The AUM value must be right-aligned with shrink-0 on the right. Ensure long manager names are truncated (truncate max-w-[160px]) and do not push the AUM value off-screen."
+    },
+
+    {
+      "id": "STATE-03",
+      "title": "Add empty state messages for missing demographics data",
+      "file": "components/StateDetailPanel.tsx",
+      "priority": "low",
+      "description": "Currently if gender or age data is missing, those sections simply don't render, with no explanation. Add conditional empty state messages: 1) If !hasGender, render the Gender section header ('Gender (APY)') followed by a message: <p className='text-[11px] text-slate-500'>APY gender data not available for this state.</p>. 2) If !hasAge, render the Age section header ('Age (NPS All Citizen)') followed by: <p className='text-[11px] text-slate-500'>Age distribution data not available for this state.</p>. These empty states must always render when the panel has data loaded (i.e., inside the data && !loading block), so users understand the data is absent rather than missing entirely.",
+      "alignment_notes": "Section headers and empty state messages must use the same left-padding as existing section headers. No extra indentation."
+    },
+
+    {
+      "id": "FM-01",
+      "title": "Replace +/- expand toggle with chevron icon in Fund Manager table",
+      "file": "components/FundManagerLeaderboard.tsx",
+      "priority": "high",
+      "description": "Replace the text '+' / '−' characters used as expand/collapse toggles in the last column of the leaderboard table with proper chevron SVG icons. Use a right-pointing chevron (►) for collapsed and a down-pointing chevron (▼) for expanded, implemented as inline SVGs (h-3.5 w-3.5). The button must have transition-transform duration-200 and apply rotate-90 when expanded (use a conditional class). Button styling: rounded p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-700/60 transition-all. This makes the expand/collapse pattern universally recognizable.",
+      "alignment_notes": "The chevron button must be vertically centered in its table cell (td with text-center and align-middle). The icon must not cause the row height to change — keep the existing py-3 row padding."
+    },
+
+    {
+      "id": "FM-02",
+      "title": "Make Fund Manager table column headers sortable",
+      "file": "components/FundManagerLeaderboard.tsx",
+      "priority": "high",
+      "description": "Add client-side sorting to the leaderboard table. Make the 'AUM (₹ Cr)' and 'Share' column headers clickable for sorting. Add a sortKey state (default: 'aum') and sortDir state (default: 'desc'). Clicking a sortable header toggles sortDir between 'asc' and 'desc', or sets the new sortKey. The displayed leaderboard data should be a sorted copy of the original array (do not mutate). Show a sort indicator arrow (↑ / ↓) inline after the column header text, using text-cyan-400 when that column is active and text-slate-600 when inactive. The '#' and 'Fund manager' headers are not sortable. The empty Actions and Expand columns are not sortable. Each sortable header must have cursor-pointer and hover:text-white styling.",
+      "alignment_notes": "Sort indicators must be inline with the header text using inline-flex items-center gap-1. Header cells must not change width when sort state changes. Use text-right on AUM and Share headers (they remain right-aligned)."
+    },
+
+    {
+      "id": "FM-03",
+      "title": "Add sticky table header to Fund Manager leaderboard",
+      "file": "components/FundManagerLeaderboard.tsx",
+      "priority": "medium",
+      "description": "Make the <thead> sticky so column headers remain visible when the user scrolls the leaderboard table. Apply sticky top-0 z-10 to the <thead> element. Apply the same bg-slate-800/60 background to maintain visual separation from rows beneath. Add a border-b border-slate-700/60 to the last header row. The outer scroll container (div.overflow-x-auto) must have a defined max height to enable scrolling — use max-h-[600px] sm:max-h-[700px] overflow-y-auto on the overflow wrapper div, not on the entire component.",
+      "alignment_notes": "The sticky header must not overlap the page title / 'As of date' row above the table. The z-10 ensures the header appears above table rows during scroll but below any dropdowns (which should be z-50+). Do not apply sticky to individual <th> cells — apply it to the <thead> element."
+    },
+
+    {
+      "id": "FM-04",
+      "title": "Highlight #1 ranked row with a subtle accent",
+      "file": "components/FundManagerLeaderboard.tsx",
+      "priority": "low",
+      "description": "For the row where row.rank === 1, add a subtle amber/gold left border accent. Apply a left-border style: className addition of 'border-l-2 border-amber-400/60' on the <tr> element (in addition to existing classes). Also render a small crown emoji or SVG icon (👑 or inline SVG) before the rank number '1' in the rank cell. The rank cell for #1 should show: <span className='text-amber-400'>👑</span> followed by the number. For all other rows the rank cell remains unchanged.",
+      "alignment_notes": "The border-l-2 must not shift cell content — it occupies the border space and does not add to element width. The crown icon must be inline with the rank number using inline-flex items-center gap-1 in the rank cell."
+    },
+
+    {
+      "id": "COMPARE-01",
+      "title": "Auto-compare on selection — remove explicit Compare button",
+      "file": "app/compare/page.tsx",
+      "priority": "high",
+      "description": "Remove the explicit 'Compare' button from the page. Instead, trigger fetchComparison automatically whenever the selected array changes and selected.length >= 2. Use a useEffect that watches [selected] and calls fetchComparison(selected) when selected.length >= 2. When selected.length drops below 2, call setData(null) to clear results. The FundManagerSelector section should show a helper text below the selector (not a button): 'Select 2–3 fund managers to compare. Results update automatically.' styled as text-xs text-slate-400 mt-2. Show a loading skeleton (3 placeholder cards with animate-pulse bg-slate-800/60 rounded-2xl h-40) while loading instead of a spinner. Remove the handleCompare function entirely.",
+      "alignment_notes": "The helper text must be left-aligned below the selector with mt-2. Do not add empty space where the button was — the helper text takes its place."
+    },
+
+    {
+      "id": "COMPARE-02",
+      "title": "Add helper text showing manager selection limit",
+      "file": "components/compare/FundManagerSelector.tsx",
+      "priority": "medium",
+      "description": "Read the existing FundManagerSelector component. At the top of the selector UI, add a subtitle or instruction line: 'Select 2–3 fund managers' in text-xs text-slate-400. In the onChange handler, enforce a maximum of 3 selections — if the user tries to select a 4th manager, do not add it and instead flash a brief message (use a local state string, cleared after 2 seconds): 'Maximum 3 managers can be compared.' shown in text-xs text-amber-400 below the selector. The dropdown options for already-maxed-out selections should show the unselected options with reduced opacity (opacity-50 cursor-not-allowed) when 3 are already selected.",
+      "alignment_notes": "The max-selection warning message must appear below the selector input, not floating or overlapping it. It must be contained within the selector component's own layout flow."
+    },
+
+    {
+      "id": "COMPARE-03",
+      "title": "Sync growth period toggle between ComparisonCards and AumTrendComparison",
+      "file": "app/compare/page.tsx, components/compare/ComparisonCards.tsx, components/compare/AumTrendComparison.tsx",
+      "priority": "medium",
+      "description": "Lift the growth period state ('3m' | '6m' | '12m') from ComparisonCards up to the compare page (CompareContent). Pass it as a prop named 'period' to both ComparisonCards and AumTrendComparison. Remove the local period state from inside ComparisonCards. Move the period toggle buttons (3m / 6m / 12m) from inside ComparisonCards to a single shared control row on the compare page, placed above the ComparisonCards section. This single row renders: label 'Growth & trend period:' + the 3 toggle buttons. Both ComparisonCards (for growth badge) and AumTrendComparison (for time range) read from this shared period prop. The AumTrendComparison must filter its aumTimeSeries data to the selected period window (3m = last 3 calendar months, 6m = last 6, 12m = last 12).",
+      "alignment_notes": "The shared period toggle row must use flex items-center gap-3 and sit between the selector card and the ComparisonCards grid with my-2 spacing. It must be left-aligned. Remove the now-redundant period toggle from inside ComparisonCards."
+    },
+
+    {
+      "id": "COMPARE-04",
+      "title": "Add 'winner' crown indicator on top metric per category in ComparisonCards",
+      "file": "components/compare/ComparisonCards.tsx",
+      "priority": "low",
+      "description": "For the metric with the highest value in each category (AUM, Subscribers, Market Share) across the compared managers, add a small crown icon badge. The existing code already sets isTopAum, isTopSubs, isTopShare booleans per card. When isTopAum is true, add a small inline badge next to the 'Total AUM' label: a span containing a crown SVG icon (h-3 w-3 text-amber-400). Same for isTopSubs and isTopShare. The badge is placed inline, to the right of the label text, using inline-flex items-center gap-1 on the label row.",
+      "alignment_notes": "The crown badge must not push the label onto a new line. Use inline-flex items-center gap-1 to keep the label and icon on the same line. The badge must not appear on all cards — only on the card with the highest value for that metric."
+    },
+
+    {
+      "id": "ANALYTICS-01",
+      "title": "Replace AUM share pie chart with horizontal bar chart",
+      "file": "components/analytics/AnalyticsDashboard.tsx",
+      "priority": "high",
+      "description": "Replace the donut PieChart for 'Top fund managers by AUM share' with a horizontal BarChart (layout='vertical'). Use Recharts BarChart with layout='vertical', data mapped from managerData as [{name, value: sharePct}], sorted descending by value. Bar fill: use the COLORS array indexed by position (same colors as before). Each bar should show the manager name on the YAxis (width: 120 on desktop, 90 on mobile) and share percentage on the XAxis (tickFormatter: v => v+'%'). Add a Bar label on the right side of each bar showing the exact percentage (e.g. '23.4%') using Recharts <LabelList dataKey='value' position='right' formatter={v => v.toFixed(1)+'%'} style={{fill: '#94a3b8', fontSize: 10}} />. Remove the color-coded legend list below the chart (the ul list) since manager names are now on the YAxis. Chart height: h-64 sm:h-72. Remove the old PieChart import if no longer used elsewhere.",
+      "alignment_notes": "Manager names on the YAxis must not be truncated — use a sufficiently wide YAxis width. Bar chart must use ResponsiveContainer width='100%'. Ensure LabelList values do not overflow the chart container by leaving right margin: margin={{ right: 40 }}."
+    },
+
+    {
+      "id": "ANALYTICS-02",
+      "title": "Add section headers to group Analytics page charts",
+      "file": "components/analytics/AnalyticsDashboard.tsx",
+      "priority": "medium",
+      "description": "Add section header dividers between chart groups to create visual hierarchy. Three sections: 1) 'Market Overview' — covers the 4-metric grid and the AUM share bar chart + gender pie chart row. 2) 'Subscriber Demographics' — covers the age distribution bar chart. 3) 'State Analysis' — covers the top states by subscribers and top states by SG contribution charts. Each section header is a <div> with a left-aligned <h2> in text-xs font-semibold uppercase tracking-widest text-slate-500, and a full-width <hr> border-slate-700/50 beneath it, styled as flex items-center gap-3 with the <hr> taking flex-1. Add pt-2 spacing before each section header (except the first). This must not change any existing chart or grid layouts.",
+      "alignment_notes": "Section headers must span the full content width. The hr line must align with the right edge of the content area. Use flex items-center gap-3 with hr flex-1 to achieve a 'title — line' pattern."
+    },
+
+    {
+      "id": "ANALYTICS-03",
+      "title": "Add 'Data as of [date]' label to each chart in Analytics",
+      "file": "components/analytics/AnalyticsDashboard.tsx",
+      "priority": "low",
+      "description": "Add a 'Data as of {latestAumDate formatted as YYYY-MM-DD}' label to each chart card. Place it in the top-right corner of each chart card's header row, right-aligned. Implement this by changing each chart card's header from a single <h2> to a flex justify-between items-baseline row: <h2> on the left, <span className='text-[10px] text-slate-500'>Data as of {date}</span> on the right. If latestAumDate is null, show 'Data date unknown'. This applies to all 5 chart cards (AUM share, gender, age, top states subscribers, top states contribution).",
+      "alignment_notes": "The date label must be right-aligned using ml-auto or flex justify-between. It must not wrap onto a new line on narrow screens — use text-[10px] and keep it short."
+    },
+
+    {
+      "id": "ANALYTICS-04",
+      "title": "Add click-through from Analytics charts to detail pages",
+      "file": "components/analytics/AnalyticsDashboard.tsx",
+      "priority": "medium",
+      "description": "Add navigation on chart click events: 1) Clicking a bar in 'Top states by subscribers' or 'Top states by SG contribution' should navigate to the Overview page with that state pre-selected. Use Next.js useRouter and router.push('/?state='+encodeURIComponent(stateName)) — note: the Overview page will need to read this query param and initialize selectedState from it (see OVERVIEW-06). 2) Clicking anywhere in the AUM share bar chart should navigate to router.push('/fund-managers'). Add cursor-pointer style to the BarChart component using style={{cursor: 'pointer'}} on the BarChart element. For state bars, use the onClick prop on the BarChart: onClick={(data) => { if (data?.activePayload?.[0]) router.push('/?state=...') }}.",
+      "alignment_notes": "No visual layout changes required. The cursor style change affects the entire chart area."
+    },
+
+    {
+      "id": "OVERVIEW-06",
+      "title": "Read ?state= query param on Overview page to pre-select a state",
+      "file": "app/page.tsx and/or components/DashboardTabs.tsx",
+      "priority": "medium",
+      "description": "On the Overview page, read the 'state' URL query parameter using useSearchParams (or via server-side searchParams prop in the page component). If a valid state name is in the query param, initialize the selectedState in DashboardTabs to that value. Pass an initialState prop to DashboardTabs. In DashboardTabs, use this as the initial value for the selectedState useState hook. This enables deep-linking to a specific state from other parts of the app (e.g. clicking a state bar in Analytics navigates to the map with that state pre-selected).",
+      "alignment_notes": "No layout changes. Ensure the selectedState initialization does not cause a hydration mismatch — use useEffect to set it after mount if using useSearchParams."
+    },
+
+    {
+      "id": "GLOBAL-01",
+      "title": "Standardize all currency formatting across the entire app",
+      "file": "All component files that display monetary values",
+      "priority": "high",
+      "description": "Audit every file that displays AUM or contribution values and ensure all monetary values follow the exact format: ₹ [value] Cr, where [value] is Math.round(x).toLocaleString('en-IN'). Files to update: components/StateDetailPanel.tsx, components/FundManagerLeaderboard.tsx, components/compare/ComparisonCards.tsx, components/compare/SchemeBreakdownComparison.tsx, components/analytics/AnalyticsDashboard.tsx, components/DashboardTabs.tsx. Replace any instances of just toLocaleString() (without 'en-IN') for Indian rupee values. Replace any patterns that show '₹ X Cr' without the space, or 'X Cr' without the ₹ prefix. The standard is: always ₹ followed by a space, then the number in en-IN locale, then a space and Cr.",
+      "alignment_notes": "No layout changes. This is a pure text formatting change. Ensure mono-spaced font (font-mono) is applied to all numeric values for alignment in tables and lists."
+    },
+
+    {
+      "id": "GLOBAL-02",
+      "title": "Add skeleton loaders on initial page load",
+      "file": "components/FundManagerLeaderboard.tsx, components/analytics/AnalyticsDashboard.tsx (page-level), app/page.tsx",
+      "priority": "medium",
+      "description": "Replace the plain text loading states ('Loading leaderboard…', 'Loading…') with animated skeleton screens. For FundManagerLeaderboard: when loading is true, render a skeleton table with 6 placeholder rows. Each row has 4 cells with rounded-md bg-slate-800 animate-pulse blocks of h-4 varying widths (w-8, w-32, w-20, w-16). Wrap in the same outer card div. For the analytics page (AnalyticsDashboard): Since it is server-rendered, add a Suspense boundary in app/analytics/page.tsx around the AnalyticsDashboard with a fallback that shows 4 skeleton metric cards (grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 with animate-pulse bg-slate-900/70 rounded-xl h-20 blocks) plus 2 skeleton chart blocks (rounded-xl bg-slate-900/70 h-64 animate-pulse). Do not change the data fetching logic.",
+      "alignment_notes": "Skeleton elements must match the dimensions and grid layout of the real content they replace. Skeleton rows in the table must use the same column widths as real rows to avoid layout shift when content loads."
+    },
+
+    {
+      "id": "GLOBAL-03",
+      "title": "Add page route transitions",
+      "file": "app/layout.tsx or components/DashboardLayout.tsx",
+      "priority": "low",
+      "description": "Add a simple fade-in transition when navigating between pages. In the DashboardLayout, wrap the <main> content area with a client component that applies a CSS fade-in animation on mount. Use a useEffect that adds an 'opacity-100' class after mount (starting from 'opacity-0'), with transition-opacity duration-200. Alternatively, use a key prop on the main element tied to the current pathname (usePathname) to trigger remount and re-animation on every route change. The animation must be subtle — 200ms opacity fade from 0 to 1 only. Do not use any animation libraries.",
+      "alignment_notes": "The transition must apply to the main content only, not the sidebar or navbar. The sidebar and navbar must remain visible and static during transitions."
+    },
+
+    {
+      "id": "GLOBAL-04",
+      "title": "Add 'No results' empty state with call-to-action for Global Search",
+      "file": "components/GlobalSearch.tsx",
+      "priority": "low",
+      "description": "In the search results dropdown, when the search query has >= 2 characters but results are empty (no states, no fund managers, no schemes found), show a styled empty state instead of a blank dropdown. Empty state content: a centered SVG magnifying-glass icon (h-8 w-8 text-slate-600), text 'No results for \"{query}\"' in text-sm text-slate-400, and a sub-text 'Try syncing the latest data from PFRDA.' in text-xs text-slate-500. The empty state must be inside the dropdown container with py-8 px-4 text-center. The dropdown must still appear and have the same width/border/shadow as when results are present.",
+      "alignment_notes": "The empty state must be vertically and horizontally centered within the dropdown. Use flex flex-col items-center justify-center gap-2 py-8 px-4."
+    },
+
+    {
+      "id": "GLOBAL-05",
+      "title": "Add 'last synced' timestamp to localStorage on successful sync",
+      "file": "components/TopNavbar.tsx",
+      "priority": "medium",
+      "description": "In the handleRefreshFromPfrda function, after a successful sync (inside the success branch of the try block), save the current timestamp to localStorage: localStorage.setItem('pension-dashboard-last-synced', new Date().toISOString()). This is consumed by the Sidebar footer (NAV-01) to display 'Synced: DD MMM YYYY'. This change is in addition to the existing setMessage success logic — do not remove or alter that.",
+      "alignment_notes": "No visual changes in the navbar."
+    }
+
+  ],
+
+  "do_not_change": [
+    "Any file under /app/api/ — do not modify any API route handlers.",
+    "Any file under /lib/ or /prisma/ — do not modify data access or schema logic.",
+    "tailwind.config.ts — do not add or remove Tailwind plugins or theme extensions.",
+    "The overall dark theme — do not introduce any light-mode classes or toggling logic.",
+    "The GlobalSearch Ctrl+K shortcut behavior.",
+    "The map zoom, pan, and state hover/click logic in IndiaMap.tsx and MapView.tsx (except the specific additions in OVERVIEW-04 and OVERVIEW-05).",
+    "The AumTrendComparison chart's existing line chart rendering (only add period filtering as described in COMPARE-03)."
+  ],
+
+  "testing_checklist": [
+    "Verify sidebar nav groups render correctly with labels at all screen widths (375px, 768px, 1440px).",
+    "Verify the sidebar footer 'last synced' timestamp appears after a sync and persists on page reload.",
+    "Verify the PFRDA sync confirmation popover appears on button click, is dismissable, and does not overflow on mobile.",
+    "Verify the Overview summary stats bar shows correct All-India metrics and does not overlap the tab pills or the map.",
+    "Verify the StateSearchDropdown is removed and state selection still works via map click.",
+    "Verify the FAB renders in the bottom-right corner, opens the chat panel on click, and the panel does not overlap the sidebar or navbar.",
+    "Verify the 'Reset map' button appears on the map when a state is selected and disappears when none is selected.",
+    "Verify the map legend shows min/max value labels that match the current data.",
+    "Verify the monthly contribution section in StateDetailPanel shows a bar chart with no nested scroll.",
+    "Verify the merged fund manager list in StateDetailPanel shows All-India rank badges and is sorted by state AUM.",
+    "Verify empty state messages appear for missing gender and age data in StateDetailPanel.",
+    "Verify the fund manager table uses chevron icons for expand/collapse with smooth rotation animation.",
+    "Verify clicking AUM or Share column header sorts the table and updates the sort indicator.",
+    "Verify the table has a sticky header that stays visible on scroll, and the scroll area has max-h-[600px].",
+    "Verify the #1 row has an amber left border and crown icon.",
+    "Verify the Compare page auto-fetches on selection change (>= 2 managers) without a Compare button.",
+    "Verify the period toggle on Compare page is a single shared control that syncs both ComparisonCards and AumTrendComparison.",
+    "Verify the Analytics AUM share chart is now a horizontal bar chart (not a pie/donut).",
+    "Verify Analytics section headers appear between chart groups.",
+    "Verify clicking a state bar in Analytics navigates to Overview with that state pre-selected.",
+    "Verify all currency values across the app use the format: ₹ X,XX,XXX Cr.",
+    "Verify skeleton loaders appear during loading states and match the dimensions of the real content.",
+    "Verify page transitions produce a 200ms fade-in when navigating between routes.",
+    "Verify the Global Search empty state renders when query has >= 2 chars but no results are found.",
+    "Verify no elements overlap each other at any screen width (especially on mobile at 375px).",
+    "Verify all new interactive elements have hover and focus states visible."
+  ]
+}
