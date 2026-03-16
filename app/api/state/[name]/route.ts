@@ -79,7 +79,7 @@ export async function GET(
   }
 
   // 2) Else derive from fund managers with HQ in this state + PFRDA M1
-  const managers = await prisma.pensionFundManager.findMany({
+  const managers: { id: number; name: string }[] = await prisma.pensionFundManager.findMany({
     where: { state: stateDb },
     select: { id: true, name: true },
   })
