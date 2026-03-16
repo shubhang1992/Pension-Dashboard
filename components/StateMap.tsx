@@ -62,7 +62,7 @@ export function StateMap({ stateName, className = '' }: Props) {
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center ${className}`} style={{ minHeight: 400 }}>
+      <div className={`flex items-center justify-center ${className}`} style={{ minHeight: 200 }}>
         <div className="text-slate-400 text-sm">Loading state map…</div>
       </div>
     )
@@ -70,7 +70,7 @@ export function StateMap({ stateName, className = '' }: Props) {
 
   if (error || !paths.length) {
     return (
-      <div className={`flex items-center justify-center ${className}`} style={{ minHeight: 400 }}>
+      <div className={`flex items-center justify-center ${className}`} style={{ minHeight: 200 }}>
         <div className="text-slate-500 text-sm">Map not available for this state</div>
       </div>
     )
@@ -90,7 +90,7 @@ export function StateMap({ stateName, className = '' }: Props) {
       `}</style>
       <svg
         viewBox={viewBox}
-        className={`h-full w-full max-h-[70vh] ${className}`}
+        className={`max-h-[50vh] max-w-[90%] sm:max-h-[55vh] ${className}`}
         style={{ overflow: 'visible' }}
         aria-label={`Map of ${stateName}`}
       >

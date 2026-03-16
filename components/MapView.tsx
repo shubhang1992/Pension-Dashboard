@@ -10,12 +10,12 @@ const TRANSITION_MS = 500
 const REVEAL_DELAY = 90
 const EASING = 'cubic-bezier(0.33, 1, 0.68, 1)'
 
-type MapMode = 'aum' | 'subscribers' | 'penetration'
+type MapMode = 'aum' | 'subscribers' | 'coverage'
 
 const MODE_META: Record<MapMode, { label: string; description: string }> = {
   aum: { label: 'AUM', description: 'Assets Under Management by state' },
-  subscribers: { label: 'Subscribers', description: 'NPS subscriber count by state' },
-  penetration: { label: 'Penetration', description: 'Subscribers as % of working-age population' },
+  subscribers: { label: 'Subscribers', description: 'NPS subscribers by state' },
+  coverage: { label: 'Coverage', description: 'Pension adoption vs working-age population' },
 }
 
 type MapViewProps = {
@@ -27,7 +27,7 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [stateAumMap, setStateAumMap] = useState<Record<string, number>>({})
   const [stateSubscribersMap, setStateSubscribersMap] = useState<Record<string, number>>({})
-  const [statePenetrationMap, setStatePenetrationMap] = useState<Record<string, number>>({})
+  const [stateCoverageMap, setStateCoverageMap] = useState<Record<string, number>>({})
   const [mapMode, setMapMode] = useState<MapMode>('aum')
   const [stateMapRevealed, setStateMapRevealed] = useState(false)
   const searchParams = useSearchParams()
@@ -39,7 +39,7 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
       .then((d) => {
         setStateAumMap(d.stateAum ?? {})
         setStateSubscribersMap(d.stateSubscribers ?? {})
-        setStatePenetrationMap(d.statePenetration ?? {})
+        setStateCoverageMap(d.stateCoverage ?? {})
       })
       .catch(() => {})
   }, [])
@@ -71,27 +71,27 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
       {/* ── Map column ── */}
       <div className="flex min-h-[280px] flex-1 flex-col overflow-hidden sm:min-h-[340px] lg:min-h-0">
 
-        {/* Mode toggle — outside the animated layer */}
+        {/* Mode toggle — compact segmented control */}
         {!showState && (
-          <div className="flex flex-shrink-0 items-center gap-3 px-3 pb-1 pt-2 sm:px-4">
-            <div className="inline-flex rounded-full border border-slate-700/50 bg-slate-800/80 p-[3px] backdrop-blur-sm">
-              {(['aum', 'subscribers', 'penetration'] as const).map((mode) => (
+          <div className="flex flex-shrink-0 items-center gap-2.5 px-3 py-1.5 sm:px-4">
+            {(['aum', 'subscribers', 'coverage'] as const).map((mode, i) => (
+              <React.Fragment key={mode}>
+                {i > 0 && <span className="text-slate-700">·</span>}
                 <button
-                  key={mode}
                   type="button"
                   onClick={() => setMapMode(mode)}
-                  className={`relative rounded-full px-3.5 py-[5px] text-[11px] font-semibold transition-all duration-200 sm:px-4 sm:py-1.5 sm:text-xs ${
+                  className={`text-[11px] font-medium transition-colors sm:text-xs ${
                     mapMode === mode
-                      ? 'bg-cyan-500 text-white shadow-[0_0_12px_rgba(34,211,238,0.3)]'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'text-cyan-400'
+                      : 'text-slate-500 hover:text-slate-300'
                   }`}
                 >
                   {MODE_META[mode].label}
                 </button>
-              ))}
-            </div>
-            <span className="hidden text-[11px] text-slate-500 sm:inline">
-              {MODE_META[mapMode].description}
+              </React.Fragment>
+            ))}
+            <span className="hidden text-[10px] text-slate-600 sm:inline">
+              — {MODE_META[mapMode].description}
             </span>
           </div>
         )}
@@ -114,7 +114,7 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
               onSelectState={handleSelect}
               stateAumMap={stateAumMap}
               stateSubscribersMap={stateSubscribersMap}
-              statePenetrationMap={statePenetrationMap}
+              stateCoverageMap={stateCoverageMap}
               mapMode={mapMode}
               className="h-full w-full"
             />

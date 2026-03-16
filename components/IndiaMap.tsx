@@ -7,14 +7,14 @@ type Location = { id: string; name: string; path: string }
 type MapData = { label: string; viewBox: string; locations: Location[] }
 const mapData = indiaMapData as MapData
 
-type MapMode = 'aum' | 'subscribers' | 'penetration'
+type MapMode = 'aum' | 'subscribers' | 'coverage'
 
 type Props = {
   selectedStateName: string | null
   onSelectState: (stateName: string) => void
   stateAumMap?: Record<string, number>
   stateSubscribersMap?: Record<string, number>
-  statePenetrationMap?: Record<string, number>
+  stateCoverageMap?: Record<string, number>
   mapMode?: MapMode
   className?: string
 }
@@ -57,7 +57,7 @@ const PALETTES: Record<MapMode, [number, number, number][]> = {
     [167, 139, 250],   // violet-400
     [221, 214, 254],   // violet-200
   ],
-  penetration: [
+  coverage: [
     [153, 27, 27],     // deep red
     [220, 80, 30],     // orange-red
     [234, 179, 8],     // yellow-500
@@ -89,7 +89,7 @@ function normalizeValue(v: number, scale: { p5: number; p95: number }): number {
 // ─── Legend helpers ───
 
 function formatLegendValue(v: number, mode: MapMode): string {
-  if (mode === 'penetration') return `${v.toFixed(1)}%`
+  if (mode === 'coverage') return `${v.toFixed(1)}%`
   if (v >= 10000000) return `${(v / 10000000).toFixed(1)}Cr`
   if (v >= 100000) return `${(v / 100000).toFixed(1)}L`
   if (v >= 1000) return `${(v / 1000).toFixed(0)}K`
@@ -103,7 +103,7 @@ export function IndiaMap({
   onSelectState,
   stateAumMap = {},
   stateSubscribersMap = {},
-  statePenetrationMap = {},
+  stateCoverageMap = {},
   mapMode = 'aum',
   className = '',
 }: Props) {
@@ -111,17 +111,17 @@ export function IndiaMap({
 
   const aumScale = useMemo(() => buildScale(Object.values(stateAumMap)), [stateAumMap])
   const subScale = useMemo(() => buildScale(Object.values(stateSubscribersMap)), [stateSubscribersMap])
-  const penScale = useMemo(() => buildScale(Object.values(statePenetrationMap)), [statePenetrationMap])
+  const covScale = useMemo(() => buildScale(Object.values(stateCoverageMap)), [stateCoverageMap])
 
-  const activeScale = mapMode === 'aum' ? aumScale : mapMode === 'subscribers' ? subScale : penScale
+  const activeScale = mapMode === 'aum' ? aumScale : mapMode === 'subscribers' ? subScale : covScale
 
   const getDataMap = useCallback(
     (name: string) => {
       if (mapMode === 'aum') return stateAumMap[name] ?? 0
       if (mapMode === 'subscribers') return stateSubscribersMap[name] ?? 0
-      return statePenetrationMap[name] ?? 0
+      return stateCoverageMap[name] ?? 0
     },
-    [mapMode, stateAumMap, stateSubscribersMap, statePenetrationMap]
+    [mapMode, stateAumMap, stateSubscribersMap, stateCoverageMap]
   )
 
   const getFill = useCallback(

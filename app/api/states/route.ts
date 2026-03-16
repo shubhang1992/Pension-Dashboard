@@ -12,11 +12,11 @@ const mapData = indiaMapData as MapData
 export async function GET() {
   const stateAum: Record<string, number> = {}
   const stateSubscribers: Record<string, number> = {}
-  const statePenetration: Record<string, number> = {}
+  const stateCoverage: Record<string, number> = {}
   for (const loc of mapData.locations) {
     stateAum[loc.name] = 0
     stateSubscribers[loc.name] = 0
-    statePenetration[loc.name] = 0
+    stateCoverage[loc.name] = 0
   }
 
   // State-wise subscribers from PFRDA A22/A6 import (StateWiseSnapshot)
@@ -72,13 +72,13 @@ export async function GET() {
   for (const loc of mapData.locations) {
     const subs = stateSubscribers[loc.name] ?? 0
     const pop = STATE_WORKING_AGE_POPULATION[loc.name] ?? 0
-    statePenetration[loc.name] = pop > 0 ? +((subs / pop) * 100).toFixed(2) : 0
+    stateCoverage[loc.name] = pop > 0 ? +((subs / pop) * 100).toFixed(2) : 0
   }
 
   return NextResponse.json({
     stateAum,
     stateSubscribers,
-    statePenetration,
+    stateCoverage,
     asOfDate: latestDate?.toISOString().slice(0, 10) ?? null,
   })
 }

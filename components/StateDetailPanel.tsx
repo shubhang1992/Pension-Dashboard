@@ -134,14 +134,14 @@ export function StateDetailPanel({ stateName, onClose }: Props) {
 
           {data.subscribers > 0 && (() => {
             const pop = STATE_WORKING_AGE_POPULATION[stateName] ?? 0
-            const penetration = pop > 0 ? ((data.subscribers / pop) * 100).toFixed(2) : null
-            return penetration ? (
+            const coverage = pop > 0 ? ((data.subscribers / pop) * 100).toFixed(2) : null
+            return coverage ? (
               <div className="rounded-lg bg-slate-800/70 px-3 py-2 border border-slate-700/40 sm:rounded-xl sm:px-4 sm:py-3">
                 <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 sm:text-xs">
-                  Penetration Rate
+                  Coverage Rate
                 </p>
                 <p className="mt-0.5 text-lg font-bold text-cyan-400 sm:mt-1 sm:text-2xl">
-                  {penetration}%
+                  {coverage}%
                 </p>
                 <p className="mt-0.5 text-[10px] text-slate-500">
                   Subscribers / Working-age pop ({(pop / 1000000).toFixed(1)}M)
