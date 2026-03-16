@@ -78,32 +78,38 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
             transition: `opacity ${TRANSITION_DURATION_MS}ms ${EASING}, transform ${TRANSITION_DURATION_MS}ms ${EASING}, filter ${TRANSITION_DURATION_MS}ms ${EASING}`,
           }}
         >
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex gap-1 rounded-xl bg-slate-800/80 p-1">
-              {(['aum', 'subscribers', 'penetration'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setMapMode(mode)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
-                    mapMode === mode
-                      ? 'bg-cyan-500 text-white'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {mode === 'aum' ? 'AUM' : mode === 'subscribers' ? 'Subscribers' : 'Penetration'}
-                </button>
-              ))}
+          <div className="flex h-full w-full flex-col">
+            {/* Mode toggle - pinned top-center */}
+            <div className="flex flex-shrink-0 justify-center pb-1 pt-1">
+              <div className="inline-flex rounded-full border border-slate-700/60 bg-slate-800/90 p-0.5 shadow-lg backdrop-blur">
+                {(['aum', 'subscribers', 'penetration'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setMapMode(mode)}
+                    className={`rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide transition-all sm:px-4 sm:py-1.5 sm:text-xs ${
+                      mapMode === mode
+                        ? 'bg-cyan-500 text-white shadow-md shadow-cyan-500/25'
+                        : 'text-slate-400 hover:text-slate-100'
+                    }`}
+                  >
+                    {mode === 'aum' ? 'AUM' : mode === 'subscribers' ? 'Subscribers' : 'Penetration'}
+                  </button>
+                ))}
+              </div>
             </div>
-            <IndiaMap
-              selectedStateName={selectedState}
-              onSelectState={handleSelectState}
-              stateAumMap={stateAumMap}
-              stateSubscribersMap={stateSubscribersMap}
-              statePenetrationMap={statePenetrationMap}
-              mapMode={mapMode}
-              className="h-full w-full"
-            />
+            {/* Map */}
+            <div className="flex min-h-0 flex-1 items-center justify-center">
+              <IndiaMap
+                selectedStateName={selectedState}
+                onSelectState={handleSelectState}
+                stateAumMap={stateAumMap}
+                stateSubscribersMap={stateSubscribersMap}
+                statePenetrationMap={statePenetrationMap}
+                mapMode={mapMode}
+                className="h-full w-full"
+              />
+            </div>
           </div>
         </div>
 
