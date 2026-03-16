@@ -44,14 +44,14 @@ function multiStop(
 
 const PALETTES: Record<MapMode, [number, number, number][]> = {
   aum: [
-    [15, 23, 42],      // slate-950
-    [14, 65, 82],      // dark teal
+    [30, 41, 59],      // slate-800 (visible on dark bg)
+    [22, 78, 99],      // cyan-900
     [8, 145, 178],     // cyan-600
     [34, 211, 238],    // cyan-400
     [165, 243, 252],   // cyan-200
   ],
   subscribers: [
-    [15, 23, 42],      // slate-950
+    [30, 41, 59],      // slate-800 (visible on dark bg)
     [49, 27, 96],      // deep purple
     [109, 40, 217],    // violet-600
     [167, 139, 250],   // violet-400
@@ -188,7 +188,7 @@ export function IndiaMap({
                     ? 'rgba(255,255,255,0.55)'
                     : 'rgba(71,85,105,0.35)'
               }
-              strokeWidth={isSelected ? 1.6 : isHov ? 0.9 : 0.35}
+              strokeWidth={isSelected ? 1.6 : isHov ? 0.9 : 0.4}
               strokeLinejoin="round"
               style={{
                 filter: isSelected ? 'url(#sel-glow)' : isHov ? 'url(#hov-glow)' : undefined,

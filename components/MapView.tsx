@@ -139,7 +139,7 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
                   transition: `all ${TRANSITION_MS}ms ${EASING} ${REVEAL_DELAY}ms`,
                 }}
               >
-                <StateMap stateName={selectedState} className="h-full w-full" />
+                <StateMap stateName={selectedState} />
               </div>
             </>
           )}

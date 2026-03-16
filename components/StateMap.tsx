@@ -90,7 +90,7 @@ export function StateMap({ stateName, className = '' }: Props) {
       `}</style>
       <svg
         viewBox={viewBox}
-        className={`max-h-[50vh] max-w-[90%] sm:max-h-[55vh] ${className}`}
+        className="block max-h-[45vh] max-w-full sm:max-h-[50vh]"
         style={{ overflow: 'visible' }}
         aria-label={`Map of ${stateName}`}
       >
