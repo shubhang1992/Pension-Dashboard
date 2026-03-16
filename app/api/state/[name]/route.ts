@@ -118,7 +118,8 @@ export async function GET(
     })
   }
 
-  const rows = await prisma.schemeAumHistory.findMany({
+  type AumRow = { fundManagerName: string; aumCrore: number | null; subscribers: number | null }
+  const rows: AumRow[] = await prisma.schemeAumHistory.findMany({
     where: { asOfDate: latestDate },
     select: { fundManagerName: true, aumCrore: true, subscribers: true },
   })
@@ -128,17 +129,17 @@ export async function GET(
   const managerAumList: { name: string; aumCrore: number }[] = []
 
   for (const m of managers) {
-    const matchRows = rows.filter(
-      (r) =>
+    let aum = 0
+    let subs = 0
+    for (const r of rows) {
+      if (
         r.fundManagerName === m.name ||
         r.fundManagerName.includes(m.name) ||
         m.name.includes(r.fundManagerName)
-    )
-    let aum = 0
-    let subs = 0
-    for (const r of matchRows) {
-      aum += r.aumCrore ?? 0
-      subs += r.subscribers ?? 0
+      ) {
+        aum += r.aumCrore ?? 0
+        subs += r.subscribers ?? 0
+      }
     }
     totalAum += aum
     totalSubscribers += subs
