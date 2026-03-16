@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 
 const NEWS_QUERY =
   'latest news about National Pension System (NPS), Atal Pension Yojana (APY), and Indian pension market, India, last 7 days'
-
 const GOOGLE_NEWS_RSS =
   'https://news.google.com/rss/search?q=%28NPS%20OR%20%22National%20Pension%20System%22%20OR%20APY%20OR%20PFRDA%20OR%20%22Indian%20pension%20market%22%29%20India&hl=en-IN&gl=IN&ceid=IN:en'
 
@@ -67,10 +66,7 @@ async function fetchGoogleNewsFallback(): Promise<Article[]> {
 
 export async function GET() {
   const apiKey = process.env.TAVILY_API_KEY
-
   try {
-    let articles: Article[] = []
-
     if (apiKey) {
       const res = await fetch('https://api.tavily.com/search', {
         method: 'POST',
@@ -99,7 +95,7 @@ export async function GET() {
           }[]
         }
 
-        articles =
+        const articles =
           json.results
             ?.map((r) => ({
               title: r.title ?? 'Untitled',
@@ -110,14 +106,21 @@ export async function GET() {
               imageUrl: r.image_url ?? null,
             }))
             .filter((a) => a.url !== '#') ?? []
+
+        if (articles.length > 0) {
+          return NextResponse.json({ articles, provider: 'tavily' })
+        }
       }
     }
 
-    if (articles.length === 0) {
-      articles = await fetchGoogleNewsFallback()
-    }
-
-    return NextResponse.json({ articles })
+    const rssArticles = await fetchGoogleNewsFallback()
+    return NextResponse.json({
+      articles: rssArticles,
+      provider: 'google-rss',
+      ...(apiKey
+        ? { warning: 'Tavily returned no articles; using Google News RSS fallback.' }
+        : { warning: 'TAVILY_API_KEY missing; using Google News RSS fallback.' }),
+    })
   } catch (e) {
     console.error('[api/news]', e)
     const fallbackArticles = await fetchGoogleNewsFallback().catch(() => [])

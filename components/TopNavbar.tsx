@@ -19,8 +19,15 @@ export function TopNavbar({ onMenuClick, sidebarOpen = true }: TopNavbarProps) {
   async function handleRefreshFromPfrda() {
     setSyncing(true)
     setMessage(null)
+    let timeout: ReturnType<typeof setTimeout> | null = null
     try {
-      const res = await fetch('/api/sync-pfrda', { method: 'POST' })
+      const controller = new AbortController()
+      timeout = setTimeout(() => controller.abort(), 120000)
+      const res = await fetch('/api/sync-pfrda', {
+        method: 'POST',
+        signal: controller.signal,
+      })
+      if (timeout) clearTimeout(timeout)
       const data = await res.json()
       if (!res.ok) {
         setMessage({
@@ -31,19 +38,26 @@ export function TopNavbar({ onMenuClick, sidebarOpen = true }: TopNavbarProps) {
       }
       const m1 = data.m1Rows ?? data.rowsImported ?? 0
       const state = data.stateUpserted ?? 0
+      const asOf = typeof data.m1LatestAsOf === 'string' ? data.m1LatestAsOf : null
       setMessage({
         type: 'success',
         text: state
-          ? `Synced: ${m1} AUM rows, ${state} state snapshots.`
-          : `Synced ${m1} rows from PFRDA.`,
+          ? `Synced: ${m1} AUM rows${asOf ? ` (latest ${asOf})` : ''}, ${state} state snapshots.`
+          : `Synced ${m1} rows from PFRDA${asOf ? ` (latest ${asOf})` : ''}.`,
       })
       router.refresh()
     } catch (err) {
       setMessage({
         type: 'error',
-        text: err instanceof Error ? err.message : 'Refresh failed',
+        text:
+          err instanceof Error && err.name === 'AbortError'
+            ? 'Sync is taking too long. Please refresh the page in 1-2 minutes to see updated data.'
+            : err instanceof Error
+              ? err.message
+              : 'Refresh failed',
       })
     } finally {
+      if (timeout) clearTimeout(timeout)
       setSyncing(false)
     }
   }

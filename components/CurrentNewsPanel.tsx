@@ -32,8 +32,8 @@ export function CurrentNewsPanel() {
         }
         if (!cancelled) {
           setArticles(json.articles ?? [])
-          if (json.error) {
-            setError(json.error)
+          if (json.error || json.warning) {
+            setError(json.error ?? json.warning)
           }
         }
       } catch (e) {
