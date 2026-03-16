@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { STATE_WORKING_AGE_POPULATION } from '@/lib/census-data'
 
 type StateData = {
   stateName: string
@@ -130,6 +131,24 @@ export function StateDetailPanel({ stateName, onClose }: Props) {
           {data.message && !data.isAllIndiaFallback && (
             <p className="text-xs text-amber-400 sm:text-sm">{data.message}</p>
           )}
+
+          {data.subscribers > 0 && (() => {
+            const pop = STATE_WORKING_AGE_POPULATION[stateName] ?? 0
+            const penetration = pop > 0 ? ((data.subscribers / pop) * 100).toFixed(2) : null
+            return penetration ? (
+              <div className="rounded-lg bg-slate-800/70 px-3 py-2 border border-slate-700/40 sm:rounded-xl sm:px-4 sm:py-3">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 sm:text-xs">
+                  Penetration Rate
+                </p>
+                <p className="mt-0.5 text-lg font-bold text-cyan-400 sm:mt-1 sm:text-2xl">
+                  {penetration}%
+                </p>
+                <p className="mt-0.5 text-[10px] text-slate-500">
+                  Subscribers / Working-age pop ({(pop / 1000000).toFixed(1)}M)
+                </p>
+              </div>
+            ) : null
+          })()}
 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <div className="rounded-lg bg-slate-800/70 px-3 py-2 border border-slate-700/40 sm:rounded-xl sm:px-4 sm:py-3">

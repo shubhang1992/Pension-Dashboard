@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { GlobalSearch } from '@/components/GlobalSearch'
 
 type TopNavbarProps = {
   onMenuClick?: () => void
@@ -92,6 +93,10 @@ export function TopNavbar({ onMenuClick, sidebarOpen = true }: TopNavbarProps) {
             State-wise data · Fund managers · Auto-sync from PFRDA
           </p>
         </div>
+      </div>
+
+      <div className="flex flex-1 items-center justify-center px-2 sm:px-4">
+        <GlobalSearch />
       </div>
 
       <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-2">

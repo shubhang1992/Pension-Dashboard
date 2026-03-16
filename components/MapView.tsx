@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useState, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { IndiaMap } from '@/components/IndiaMap'
 import { StateMap } from '@/components/StateMap'
 import { StateDetailPanel } from '@/components/StateDetailPanel'
@@ -18,7 +19,10 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [stateAumMap, setStateAumMap] = useState<Record<string, number>>({})
   const [stateSubscribersMap, setStateSubscribersMap] = useState<Record<string, number>>({})
+  const [statePenetrationMap, setStatePenetrationMap] = useState<Record<string, number>>({})
+  const [mapMode, setMapMode] = useState<'aum' | 'subscribers' | 'penetration'>('aum')
   const [stateMapRevealed, setStateMapRevealed] = useState(false)
+  const searchParams = useSearchParams()
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -27,9 +31,17 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
       .then((d) => {
         setStateAumMap(d.stateAum ?? {})
         setStateSubscribersMap(d.stateSubscribers ?? {})
+        setStatePenetrationMap(d.statePenetration ?? {})
       })
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    const stateParam = searchParams.get('state')
+    if (stateParam && !selectedState) {
+      setSelectedState(stateParam)
+    }
+  }, [searchParams, selectedState])
 
   useEffect(() => {
     if (selectedState) {
@@ -66,13 +78,33 @@ export function MapView({ rightTopSlot, rightBottomSlot }: MapViewProps) {
             transition: `opacity ${TRANSITION_DURATION_MS}ms ${EASING}, transform ${TRANSITION_DURATION_MS}ms ${EASING}, filter ${TRANSITION_DURATION_MS}ms ${EASING}`,
           }}
         >
-          <IndiaMap
-            selectedStateName={selectedState}
-            onSelectState={handleSelectState}
-            stateAumMap={stateAumMap}
-            stateSubscribersMap={stateSubscribersMap}
-            className="h-full w-full"
-          />
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex gap-1 rounded-xl bg-slate-800/80 p-1">
+              {(['aum', 'subscribers', 'penetration'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setMapMode(mode)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
+                    mapMode === mode
+                      ? 'bg-cyan-500 text-white'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {mode === 'aum' ? 'AUM' : mode === 'subscribers' ? 'Subscribers' : 'Penetration'}
+                </button>
+              ))}
+            </div>
+            <IndiaMap
+              selectedStateName={selectedState}
+              onSelectState={handleSelectState}
+              stateAumMap={stateAumMap}
+              stateSubscribersMap={stateSubscribersMap}
+              statePenetrationMap={statePenetrationMap}
+              mapMode={mapMode}
+              className="h-full w-full"
+            />
+          </div>
         </div>
 
         {/* State map layer */}

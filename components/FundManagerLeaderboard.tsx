@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 type SchemeRow = { schemeName: string; aumCrore: number }
 type LeaderboardEntry = {
@@ -20,6 +21,7 @@ export function FundManagerLeaderboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Set<number>>(new Set())
+  const router = useRouter()
 
   useEffect(() => {
     fetch('/api/fund-managers/leaderboard')
@@ -82,6 +84,7 @@ export function FundManagerLeaderboard() {
                 <th className="px-4 py-3 font-semibold text-slate-300">Fund manager</th>
                 <th className="px-4 py-3 text-right font-semibold text-slate-300">AUM (₹ Cr)</th>
                 <th className="px-4 py-3 text-right font-semibold text-slate-300">Share</th>
+                <th className="px-4 py-3 font-semibold text-slate-300"></th>
                 <th className="w-10 px-2 py-3" aria-label="Expand" />
               </tr>
             </thead>
@@ -101,6 +104,15 @@ export function FundManagerLeaderboard() {
                       <td className="px-4 py-3 text-right font-mono text-slate-400">
                         {row.sharePct.toFixed(1)}%
                       </td>
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          onClick={() => router.push(`/compare?names=${encodeURIComponent(row.name)}`)}
+                          className="rounded-lg border border-slate-600 px-2 py-1 text-[11px] font-medium text-slate-400 transition-colors hover:border-cyan-500/50 hover:text-cyan-400"
+                        >
+                          Compare
+                        </button>
+                      </td>
                       <td className="px-2 py-3">
                         {row.schemes.length > 0 && (
                           <button
@@ -119,7 +131,7 @@ export function FundManagerLeaderboard() {
                     </tr>
                     {isOpen && row.schemes.length > 0 && (
                       <tr className="bg-slate-800/30">
-                        <td colSpan={5} className="px-4 py-3">
+                        <td colSpan={6} className="px-4 py-3">
                           <div className="rounded-lg border border-slate-700/50 bg-slate-900/60 py-2 pl-6 pr-4">
                             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
                               Scheme-wise AUM

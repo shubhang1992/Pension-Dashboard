@@ -1,0 +1,43 @@
+/**
+ * Working-age population (15-59) by state/UT.
+ * Based on India Census 2011, projected to ~2024 estimates.
+ * State names match the @svg-maps/india location names.
+ */
+export const STATE_WORKING_AGE_POPULATION: Record<string, number> = {
+  'Andaman and Nicobar Islands': 260000,
+  'Andhra Pradesh': 34200000,
+  'Arunachal Pradesh': 900000,
+  'Assam': 20500000,
+  'Bihar': 65000000,
+  'Chandigarh': 770000,
+  'Chhattisgarh': 17500000,
+  'Dadra and Nagar Haveli': 250000,
+  'Daman and Diu': 180000,
+  'Delhi': 13000000,
+  'Goa': 1050000,
+  'Gujarat': 42000000,
+  'Haryana': 18000000,
+  'Himachal Pradesh': 4800000,
+  'Jammu and Kashmir': 8500000,
+  'Jharkhand': 22000000,
+  'Karnataka': 43000000,
+  'Kerala': 23500000,
+  'Lakshadweep': 45000,
+  'Madhya Pradesh': 49000000,
+  'Maharashtra': 78000000,
+  'Manipur': 1900000,
+  'Meghalaya': 2000000,
+  'Mizoram': 730000,
+  'Nagaland': 1300000,
+  'Odisha': 28000000,
+  'Puducherry': 870000,
+  'Punjab': 19500000,
+  'Rajasthan': 46000000,
+  'Sikkim': 430000,
+  'Tamil Nadu': 50000000,
+  'Telangana': 25000000,
+  'Tripura': 2500000,
+  'Uttar Pradesh': 133000000,
+  'Uttarakhand': 7000000,
+  'West Bengal': 62000000,
+}
