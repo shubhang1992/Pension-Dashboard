@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { getComprehensiveSummary } from '@/lib/ask-data'
+import { getComprehensiveSummary, type ComprehensiveSummary } from '@/lib/ask-data'
+import type { ChartData } from '@/lib/chat-types'
 
 type ChatHistoryItem = { role: 'user' | 'assistant'; content: string }
 
@@ -23,6 +24,172 @@ function needsWebSearch(question: string): boolean {
   const lower = question.toLowerCase()
   return WEB_TRIGGER_PHRASES.some((p) => lower.includes(p))
 }
+
+// ── Chart intent detection (keyword-based, no LLM) ──
+
+function detectChartIntent(question: string): 'bar' | 'line' | 'pie' | null {
+  const q = question.toLowerCase()
+  if (/\b(trend|over time|monthly|last 12|growth|history|changed|progress)\b/.test(q)) return 'line'
+  if (/\b(compare|top|ranking|which state|which manager|highest|lowest|breakdown)\b/.test(q)) return 'bar'
+  if (/\b(share|distribution|percentage|split|proportion|market share|gender)\b/.test(q)) return 'pie'
+  return null
+}
+
+function buildChartData(
+  question: string,
+  summary: ComprehensiveSummary,
+  chartType: 'bar' | 'line' | 'pie'
+): ChartData | null {
+  const q = question.toLowerCase()
+
+  if (/\b(aum.?trend|total aum|aum over|how has aum)\b/.test(q) && summary.aumTrend.length > 0) {
+    return {
+      type: 'line',
+      title: 'Total AUM Trend (\u20B9 Cr)',
+      xKey: 'month',
+      yKey: 'totalAumCrore',
+      data: summary.aumTrend.map((t) => ({ month: t.month.slice(0, 7), totalAumCrore: t.totalAumCrore })),
+      unit: 'Cr',
+    }
+  }
+
+  if (/\b(fund manager|top manager|who manages|manager.*aum|aum.*manager)\b/.test(q)) {
+    return {
+      type: 'bar',
+      title: 'Fund Managers by AUM (\u20B9 Cr)',
+      xKey: 'name',
+      yKey: 'aumCrore',
+      data: summary.aumOverview.managers.slice(0, 8).map((m) => ({
+        name: m.name.replace(/Pension Fund/i, '').trim(),
+        aumCrore: m.aumCrore,
+      })),
+      unit: 'Cr',
+    }
+  }
+
+  if (/\b(market share|share percentage|share pct)\b/.test(q)) {
+    return {
+      type: 'pie',
+      title: 'Fund Manager Market Share (%)',
+      xKey: 'name',
+      yKey: 'value',
+      data: summary.aumOverview.managers.map((m) => ({
+        name: m.name.replace(/Pension Fund/i, '').trim(),
+        value: m.sharePct,
+      })),
+      unit: '%',
+    }
+  }
+
+  if (/\b(state.?subscriber|which state.*(most|highest)|subscriber.*state)\b/.test(q)) {
+    return {
+      type: 'bar',
+      title: 'Top 10 States by Subscribers',
+      xKey: 'state',
+      yKey: 'subscribers',
+      data: summary.stateSubscribers.states.slice(0, 10).map((s) => ({
+        state: s.name,
+        subscribers: s.subscribers,
+      })),
+    }
+  }
+
+  if (/\b(sg.?contribution|state.?contribution|contribution.*state)\b/.test(q)) {
+    return {
+      type: 'bar',
+      title: 'Top 10 States by SG Contribution (\u20B9 Cr)',
+      xKey: 'state',
+      yKey: 'contributionCrore',
+      data: summary.stateContribution.states.slice(0, 10).map((s) => ({
+        state: s.name,
+        contributionCrore: s.contributionCrore,
+      })),
+      unit: 'Cr',
+    }
+  }
+
+  if (/\b(gender|male|female|women)\b/.test(q)) {
+    const transPct = +(100 - summary.gender.femalePct - summary.gender.malePct).toFixed(1)
+    return {
+      type: 'pie',
+      title: 'Gender Distribution of Subscribers (%)',
+      xKey: 'name',
+      yKey: 'value',
+      data: [
+        { name: 'Female', value: summary.gender.femalePct },
+        { name: 'Male', value: summary.gender.malePct },
+        ...(transPct > 0 ? [{ name: 'Transgender', value: transPct }] : []),
+      ],
+      unit: '%',
+    }
+  }
+
+  if (/\b(age|age group|age band|young|youth)\b/.test(q) && summary.ageBands.length > 0) {
+    return {
+      type: 'bar',
+      title: 'Subscriber Age Distribution',
+      xKey: 'band',
+      yKey: 'count',
+      data: summary.ageBands.map((a) => ({ band: a.band, count: a.count })),
+    }
+  }
+
+  if (/\b(scheme|which scheme|scheme aum)\b/.test(q) && summary.schemeBreakdown.length > 0) {
+    return {
+      type: 'pie',
+      title: 'AUM by Scheme (\u20B9 Cr)',
+      xKey: 'name',
+      yKey: 'value',
+      data: summary.schemeBreakdown.slice(0, 8).map((s) => ({
+        name: s.scheme,
+        value: s.aumCrore,
+      })),
+      unit: 'Cr',
+    }
+  }
+
+  // Generic fallbacks by chart type
+  if (chartType === 'line' && summary.aumTrend.length > 0) {
+    return {
+      type: 'line',
+      title: 'Total AUM Trend (\u20B9 Cr)',
+      xKey: 'month',
+      yKey: 'totalAumCrore',
+      data: summary.aumTrend.map((t) => ({ month: t.month.slice(0, 7), totalAumCrore: t.totalAumCrore })),
+      unit: 'Cr',
+    }
+  }
+  if (chartType === 'bar') {
+    return {
+      type: 'bar',
+      title: 'Fund Managers by AUM (\u20B9 Cr)',
+      xKey: 'name',
+      yKey: 'aumCrore',
+      data: summary.aumOverview.managers.slice(0, 8).map((m) => ({
+        name: m.name.replace(/Pension Fund/i, '').trim(),
+        aumCrore: m.aumCrore,
+      })),
+      unit: 'Cr',
+    }
+  }
+  if (chartType === 'pie') {
+    return {
+      type: 'pie',
+      title: 'Fund Manager Market Share (%)',
+      xKey: 'name',
+      yKey: 'value',
+      data: summary.aumOverview.managers.map((m) => ({
+        name: m.name.replace(/Pension Fund/i, '').trim(),
+        value: m.sharePct,
+      })),
+      unit: '%',
+    }
+  }
+
+  return null
+}
+
+// ── Main handler ──
 
 export async function POST(request: Request) {
   try {
@@ -51,6 +218,7 @@ export async function POST(request: Request) {
         answer:
           'Natural language questions are not configured. Add GROQ_API_KEY (recommended) or OPENAI_API_KEY to your environment and restart the app. You can still explore the dashboard using the map, Analytics, and Reports pages.',
         data: null,
+        chart: null,
       })
     }
 
@@ -60,7 +228,11 @@ export async function POST(request: Request) {
     ])
 
     const answer = await formatAnswer(question, summary, history, web)
-    return NextResponse.json({ answer, data: summary, webUsed: !!web })
+
+    const chartType = detectChartIntent(question)
+    const chart = chartType ? buildChartData(question, summary, chartType) : null
+
+    return NextResponse.json({ answer, data: summary, webUsed: !!web, chart })
   } catch (e: unknown) {
     console.error('[api/ask]', e)
     const anyErr = e as { status?: number; code?: string }
@@ -71,6 +243,7 @@ export async function POST(request: Request) {
             'Ask is temporarily unavailable because the model quota was exceeded. The rest of the dashboard still works -- please try again later or use the map, Analytics, and Reports pages directly.',
           answer: null,
           data: null,
+          chart: null,
         },
         { status: 503 }
       )
@@ -81,6 +254,7 @@ export async function POST(request: Request) {
           'Something went wrong while answering. Please try rephrasing or use the dashboard directly.',
         answer: null,
         data: null,
+        chart: null,
       },
       { status: 500 }
     )
