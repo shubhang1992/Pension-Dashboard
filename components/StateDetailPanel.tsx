@@ -53,9 +53,8 @@ export function StateDetailPanel({ stateName, onClose }: Props) {
 
   if (!stateName) {
     return (
-      <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-slate-700/50 bg-slate-900/80 p-8 text-center backdrop-blur">
-        <p className="text-slate-400">Click a state on the map</p>
-        <p className="mt-2 text-sm text-slate-500">to view subscribers, contribution &amp; demographics</p>
+      <div className="flex h-full min-h-[280px] flex-col items-center justify-center p-8 text-center">
+        <p className="text-slate-500">Select a state</p>
       </div>
     )
   }

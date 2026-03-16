@@ -3,7 +3,12 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 
-export function TopNavbar() {
+type TopNavbarProps = {
+  onMenuClick?: () => void
+  sidebarOpen?: boolean
+}
+
+export function TopNavbar({ onMenuClick, sidebarOpen = true }: TopNavbarProps) {
   const router = useRouter()
   const [syncing, setSyncing] = React.useState(false)
   const [message, setMessage] = React.useState<{
@@ -44,14 +49,35 @@ export function TopNavbar() {
   }
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/50 bg-slate-900/80 px-6 py-3 backdrop-blur">
-      <div className="min-w-0 flex-1">
-        <h2 className="text-base font-semibold text-white">
-          India Pension Market
-        </h2>
-        <p className="text-xs text-slate-400">
-          State-wise data · Fund managers · Auto-sync from PFRDA (no uploads)
-        </p>
+    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/50 bg-slate-900/80 px-4 py-3 backdrop-blur sm:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        {onMenuClick && (
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-700/60 hover:text-white"
+            aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={sidebarOpen}
+          >
+            {sidebarOpen ? (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        )}
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-white">
+            India Pension Market
+          </h2>
+          <p className="text-xs text-slate-400">
+            State-wise data · Fund managers · Auto-sync from PFRDA (no uploads)
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-shrink-0 flex-wrap items-center gap-2">

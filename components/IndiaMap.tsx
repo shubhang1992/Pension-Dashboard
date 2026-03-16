@@ -33,7 +33,7 @@ export function IndiaMap({
   }, [stateSubscribersMap])
 
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
+    <div className={`flex items-center justify-center ${className}`}>
       <svg
         viewBox={mapData.viewBox}
         className="h-full w-full max-h-[70vh] w-auto"
@@ -55,7 +55,6 @@ export function IndiaMap({
           return (
             <path
               key={loc.id}
-              id={loc.id}
               d={loc.path}
               fill={isSelected ? 'rgba(34, 211, 238, 0.35)' : `rgba(30, 41, 59, ${fillOpacity})`}
               stroke={stroke}

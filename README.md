@@ -33,3 +33,7 @@ Internal web dashboard to track Indian pension market data, built with Next.js, 
 
 6. Open http://localhost:3000 in your browser.
 
+### Ask the reports (optional)
+
+To enable natural-language questions over the dashboard data (e.g. “What is the total AUM?”, “How many subscribers in Maharashtra?”), set `OPENAI_API_KEY` in your `.env`. The **Ask the reports** button in the header opens a chat panel; answers are grounded in your actual PFRDA data (M1, A22, A6, M7). Without the key, the button still works but will prompt you to configure it.
+

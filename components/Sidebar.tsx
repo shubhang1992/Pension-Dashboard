@@ -12,7 +12,7 @@ const items: SidebarItem[] = [
   { label: 'Overview', href: '/' },
   { label: 'Analytics', href: '/analytics' },
   { label: 'Fund Managers', href: '/fund-managers' },
-  { label: 'Schemes', href: '/schemes' },
+  { label: 'Reports', href: '/reports' },
 ]
 
 export function Sidebar() {

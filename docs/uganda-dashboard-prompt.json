@@ -1,0 +1,56 @@
+{
+  "title": "Cursor prompt: Build a Uganda pension dashboard (inspired by India PFRDA dashboard)",
+  "audience": "AI assistant (e.g. Cursor) starting a new project for Uganda",
+  "purpose": "Replicate the underlying concept, architecture, and UX of the India pension dashboard in a new codebase for Uganda, adapting data sources and geography.",
+  "concept_summary": "An internal pension market dashboard that visualizes official regulatory/sector data on a map, shows region-wise metrics (subscribers, contributions, demographics), fund manager leaderboards, and analytics charts—with data refreshed from public URLs (no manual file uploads).",
+  "tech_stack": {
+    "frontend": "Next.js (App Router), React, TypeScript, Tailwind CSS",
+    "mapping": "Use a map library or SVG/GeoJSON for the country (e.g. Uganda). Clicking a region opens a detail panel.",
+    "charts": "Recharts for pie charts, bar charts (leaderboards, analytics)",
+    "backend": "Next.js API routes, server components for data fetching",
+    "database": "PostgreSQL with Prisma ORM",
+    "data_ingestion": "Scripts (Node.js ESM .mjs) that fetch Excel/CSV from official URLs, parse, and upsert into DB. Optional: fallback to local files if URL fetch fails."
+  },
+  "core_features": [
+    "Overview page: summary cards (e.g. total AUM, number of fund managers), interactive country map with region shading (e.g. by subscribers or contribution).",
+    "Clicking a region on the map opens a side panel with: region name, AUM (or fallback to national total if region AUM not available), subscribers, contribution (cumulative and optionally monthly), gender breakdown, age breakdown, and a compact fund manager leaderboard.",
+    "Fund managers page: dedicated page with a table leaderboard (rank, name, AUM, share %). Expandable rows to show scheme-wise or product-wise breakdown.",
+    "Analytics page: dashboard with pie charts (e.g. fund manager AUM share, gender distribution), bar charts (e.g. top regions by subscribers, top regions by contribution). Include legends/labels so segment names and colors are clear.",
+    "Refresh from source: a top-bar button that triggers an API route to fetch latest data from official URLs and update the database (no manual file upload). Optionally protect this route with a secret (e.g. CRON_SECRET).",
+    "Optional: region-wise contribution detail page (e.g. /regions/[name]/contributions) with total, monthly history table, and an Analytics tab (YoY change, best/worst month, etc.)."
+  ],
+  "data_model_concepts": {
+    "scheme_aum_history": "Time-series of AUM (and optionally subscribers) per fund manager and scheme/product, one row per (asOfDate, fundManagerName, schemeName). Used for leaderboard and All-India/All-Country AUM.",
+    "region_snapshot": "One row per (regionName, asOfDate): subscribers, aum (if available), contribution (cumulative), contributionHistory (JSON: month label -> value for monthly breakdown), gender (female/male/transgender counts), ageBreakdown (JSON: age band -> count). Normalize region names for map (e.g. NCT of Delhi -> Delhi) via a small mapping module.",
+    "fund_manager": "Optional table for manager metadata (name, region/city); leaderboard can be derived from scheme_aum_history by aggregating to latest date."
+  },
+  "ui_patterns": {
+    "layout": "Full-height layout: fixed left sidebar (nav: Overview, Analytics, Fund Managers, etc.), top navbar (title + Refresh button + status), main scrollable content.",
+    "map": "Map in a card; instruction text above (e.g. Click a region for details). Second column or slide-out panel for region detail (close button, metrics in a grid, then gender/age, then leaderboard).",
+    "tabs": "Use in-page tabs only where needed (e.g. Overview vs Analytics on a detail page). Main nav is sidebar links, not tabs.",
+    "cards": "Rounded, bordered, dark-themed cards (e.g. slate/cyan). Metrics: label in small caps, value prominent, optional sublabel (e.g. as-of date).",
+    "tables": "Sortable or fixed-order tables with header row; optional expandable rows for breakdowns. Use monospace for numbers.",
+    "charts": "Pie/donut: distinct colors per segment; always show a legend or list below with segment name + value/%. Use different colors for gender (e.g. female=pink, male=blue). Bar charts for top-N lists (regions, managers)."
+  },
+  "data_ingestion": {
+    "sync_route": "POST /api/sync or /api/sync-source that: (1) fetches files from predefined official URLs (e.g. central bank or pension regulator), (2) parses Excel/CSV, (3) upserts into DB. Return JSON { ok, rowsImported, error? }.",
+    "standalone_script": "A script (e.g. npm run sync:all) that does the same: fetch from URLs, parse, upsert. Can be run from cron. If files are not at public URLs, script can accept local file paths as fallback.",
+    "no_manual_upload": "Design so the primary flow is Refresh button or cron; manual upload is optional fallback only."
+  },
+  "adaptation_for_uganda": {
+    "geography": "Replace India map with Uganda map (regions/districts). Use SVG map or GeoJSON for Uganda; maintain a region name mapping if source data uses different names.",
+    "data_sources": "Identify Uganda equivalent of PFRDA: e.g. Bank of Uganda, NSSF, or pension regulator. Find where they publish Excel/CSV or PDF tables (monthly/annual AUM, contributions, membership by region). If no public URLs, design schema and UI first; ingestion can use local files or a single CSV/Excel until URLs are available.",
+    "terminology": "Replace PFRDA with the local regulator/scheme name. Replace Rs/₹ with UGX or local currency. Keep concepts: AUM, subscribers/members, contribution, gender, age bands.",
+    "schemes": "If Uganda has multiple schemes or fund managers, mirror the leaderboard and scheme-wise breakdown. If single provider (e.g. NSSF), still use same schema for consistency; leaderboard may have one row or aggregate by product/region."
+  },
+  "deliverables_checklist": [
+    "Next.js app with layout (sidebar, navbar, main).",
+    "Overview page: summary cards + country map + region detail panel.",
+    "Fund managers (or equivalent) page: leaderboard table with optional scheme breakdown.",
+    "Analytics page: pie charts (with legends), bar charts, summary cards.",
+    "API routes: /api/regions (for map shading), /api/region/[name] (detail), /api/fund-managers/leaderboard, /api/sync.",
+    "Prisma schema: RegionSnapshot (or StateWiseSnapshot), SchemeAumHistory (or equivalent), optional FundManager.",
+    "Sync script and Refresh button that fetch from configurable URLs and upsert DB.",
+    "README with setup (DATABASE_URL, npm install, prisma migrate, npm run sync:all)."
+  ]
+}

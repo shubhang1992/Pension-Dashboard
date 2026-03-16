@@ -52,7 +52,7 @@ export function FundManagerLeaderboard() {
       </div>
     )
   }
-  const { leaderboard, asOfDate, totalAumCrore } = data
+  const { leaderboard, asOfDate } = data
   if (leaderboard.length === 0) {
     return (
       <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 px-6 py-12 text-center text-slate-400">
@@ -68,7 +68,7 @@ export function FundManagerLeaderboard() {
         <div>
           <h2 className="text-lg font-semibold text-white">Fund managers by AUM</h2>
           <p className="text-sm text-slate-400">
-            All-India totals · as of {asOfDate ?? '—'} · ₹ {Math.round(totalAumCrore).toLocaleString()} Cr total
+            As of {asOfDate ?? '—'}
           </p>
         </div>
       </div>

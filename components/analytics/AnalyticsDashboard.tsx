@@ -40,14 +40,18 @@ type GenderAgg = {
   total: number
 }
 
+type AgeBand = { band: string; count: number }
+
 type Props = {
   totalAum: number
   latestAumDate: Date | null
   managerData: ManagerDatum[]
   totalSubscribers: number
+  totalContributionCrore: number
   topStatesBySubscribers: StateDatum[]
   topStatesByContribution: StateDatum[]
   gender: GenderAgg
+  ageBreakdownAllIndia: AgeBand[]
 }
 
 export function AnalyticsDashboard({
@@ -55,9 +59,11 @@ export function AnalyticsDashboard({
   latestAumDate,
   managerData,
   totalSubscribers,
+  totalContributionCrore,
   topStatesBySubscribers,
   topStatesByContribution,
   gender,
+  ageBreakdownAllIndia,
 }: Props) {
   const managerPieData = managerData.map((m) => ({
     name: m.name,
@@ -81,7 +87,7 @@ export function AnalyticsDashboard({
         </div>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-slate-700/50 bg-slate-900/70 px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             All India AUM
@@ -105,10 +111,24 @@ export function AnalyticsDashboard({
         </div>
         <div className="rounded-2xl border border-slate-700/50 bg-slate-900/70 px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Fund manager concentration
+            SG contribution (cumulative)
           </p>
-          <p className="mt-2 text-sm text-slate-300">
-            Showing top {managerData.length} PFMs by AUM share.
+          <p className="mt-2 text-2xl font-bold text-emerald-400">
+            ₹ {Math.round(totalContributionCrore).toLocaleString()} Cr
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            PFRDA M7 · since Dec-2014
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-900/70 px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Fund managers
+          </p>
+          <p className="mt-2 text-2xl font-bold text-cyan-400">
+            {managerData.length > 0 ? 'Top 8' : '—'}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            By AUM share below
           </p>
         </div>
       </section>
@@ -125,8 +145,8 @@ export function AnalyticsDashboard({
             </p>
           ) : (
             <div className="space-y-3">
-              <div className="h-64">
-                <ResponsiveContainer>
+              <div className="h-64 min-h-[200px] w-full">
+                <ResponsiveContainer width="100%" height={256}>
                   <PieChart>
                     <Pie
                       data={managerPieData}
@@ -190,8 +210,8 @@ export function AnalyticsDashboard({
               No gender data yet. Refresh from PFRDA to import A6.
             </p>
           ) : (
-            <div className="h-64">
-              <ResponsiveContainer>
+            <div className="h-64 min-h-[200px] w-full">
+              <ResponsiveContainer width="100%" height={256}>
                 <PieChart>
                   <Pie
                     data={genderData}
@@ -252,6 +272,53 @@ export function AnalyticsDashboard({
         </div>
       </section>
 
+      {ageBreakdownAllIndia.length > 0 && (
+        <section className="rounded-2xl border border-slate-700/50 bg-slate-900/70 px-5 py-4">
+          <h2 className="mb-3 text-sm font-semibold text-slate-200">
+            Age distribution (NPS All Citizen — latest state snapshots)
+          </h2>
+          <div className="h-72 min-h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+              <BarChart
+                data={ageBreakdownAllIndia}
+                margin={{ top: 10, right: 10, left: -10, bottom: 20 }}
+                layout="vertical"
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={false} />
+                <XAxis
+                  type="number"
+                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                  axisLine={{ stroke: '#475569' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="band"
+                  width={48}
+                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  axisLine={{ stroke: '#475569' }}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#0f172a',
+                    border: '1px solid #334155',
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                  formatter={(value: unknown) => {
+                    const str = typeof value === 'number' ? value.toLocaleString() : String(value ?? '')
+                    return [str, 'Subscribers'] as [React.ReactNode, string]
+                  }}
+                />
+                <Bar dataKey="count" fill="#818cf8" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+      )}
+
       <section className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border border-slate-700/50 bg-slate-900/70 px-5 py-4">
           <h2 className="mb-3 text-sm font-semibold text-slate-200">
@@ -262,8 +329,8 @@ export function AnalyticsDashboard({
               No state subscriber data yet.
             </p>
           ) : (
-            <div className="h-72">
-              <ResponsiveContainer>
+            <div className="h-72 min-h-[240px] w-full">
+              <ResponsiveContainer width="100%" height={288}>
                 <BarChart
                   data={topStatesBySubscribers.map((s) => ({
                     name: s.stateName,
@@ -312,8 +379,8 @@ export function AnalyticsDashboard({
               No SG contribution data yet.
             </p>
           ) : (
-            <div className="h-72">
-              <ResponsiveContainer>
+            <div className="h-72 min-h-[240px] w-full">
+              <ResponsiveContainer width="100%" height={288}>
                 <BarChart
                   data={topStatesByContribution.map((s) => ({
                     name: s.stateName,

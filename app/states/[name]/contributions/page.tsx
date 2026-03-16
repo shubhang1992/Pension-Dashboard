@@ -1,5 +1,4 @@
-import { Sidebar } from '@/components/Sidebar'
-import { TopNavbar } from '@/components/TopNavbar'
+import { DashboardLayout } from '@/components/DashboardLayout'
 import { prisma } from '@/lib/prisma'
 import { normalizeStateNameForDb } from '@/lib/state-name-map'
 import { StateContributionsTabs } from '@/components/StateContributionsTabs'
@@ -48,32 +47,24 @@ export default async function StateContributionsPage({ params }: Props) {
   }
 
   return (
-    <div className="flex h-screen">
-      <div className="w-64 flex-none">
-        <Sidebar />
-      </div>
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <TopNavbar />
-        <main className="flex-1 overflow-y-auto px-6 py-5">
-          <div className="space-y-5">
-            {!snapshot && (
-              <div className="rounded-2xl border border-amber-500/40 bg-amber-950/30 px-5 py-4 text-sm text-amber-100">
-                No state-wise snapshot found for this state. Try refreshing from
-                PFRDA.
-              </div>
-            )}
-
-            {snapshot && (
-              <StateContributionsTabs
-                stateName={stateNameDecoded}
-                total={total}
-                ordered={ordered}
-              />
-            )}
+    <DashboardLayout>
+      <div className="space-y-5">
+        {!snapshot && (
+          <div className="rounded-2xl border border-amber-500/40 bg-amber-950/30 px-5 py-4 text-sm text-amber-100">
+            No state-wise snapshot found for this state. Try refreshing from
+            PFRDA.
           </div>
-        </main>
+        )}
+
+        {snapshot && (
+          <StateContributionsTabs
+            stateName={stateNameDecoded}
+            total={total}
+            ordered={ordered}
+          />
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }
 
