@@ -7,7 +7,7 @@ import { TopNavbar } from '@/components/TopNavbar'
 const SIDEBAR_STORAGE_KEY = 'pension-dashboard-sidebar-open'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     try {
